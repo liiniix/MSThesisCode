@@ -1,9 +1,9 @@
 import torch
-from DatasetController.dataset_controller import prepare_datasets, get_cora_dataset
+from DatasetController.dataset_controller import get_cora_dataset, get_proposed_dataset
 import torch.nn.functional as F
 from GraphSage.graph_sage_controller import get_graphsage_model
 from GCN.gcn_controller import get_gcn_model
-
+from ProposedModel.proposed_model import get_proposed_model
 
 DEVICE = torch.device('cuda'
                       if
@@ -19,7 +19,9 @@ def __train(model,
 
     model.train()
     optimizer.zero_grad()
-    F.nll_loss(model()[data.train_mask], data.y[data.train_mask]).backward()
+    out = model(data)
+    F.nll_loss(out[data.train_mask], data.y[data.train_mask])\
+     .backward()
     optimizer.step()
 
 
@@ -29,13 +31,16 @@ def __test(model,
     
     data = dataset[0].to(DEVICE)
 
+
     model.eval()
-    logits, accs = model(), []
-    for _, mask in data('train_mask', 'val_mask', 'test_mask'):
-        pred = logits[mask].max(1)[1]
-        acc = pred.eq(data.y[mask]).sum().item() / mask.sum().item()
-        accs.append(acc)
-    return accs
+    pred = model(data).argmax(dim=1)
+    train_correct = (pred[data.train_mask] == data.y[data.train_mask]).sum()
+    test_correct = (pred[data.test_mask] == data.y[data.test_mask]).sum()
+
+    train_acc = int(train_correct) / int(data.train_mask.sum())
+    test_acc = int(test_correct) / int(data.test_mask.sum())
+    
+    return train_acc, test_acc
 
 def train_and_show_stat(num_epoch,
                         model,
@@ -43,30 +48,25 @@ def train_and_show_stat(num_epoch,
                         dataset,
                         prelude):
     print(prelude)
-    best_val_acc = test_acc = 0
 
     for epoch in range(num_epoch):
         __train(model,
                 optimizer,
                 dataset)
-        _, val_acc, tmp_test_acc = __test(model,
-                                          optimizer,
-                                          dataset)
-        if val_acc > best_val_acc:
-            best_val_acc = val_acc
-            test_acc = tmp_test_acc
-        log = 'Epoch: {:03d}, Val: {:.4f}, Test: {:.4f}'
+        train_acc, test_acc = __test(model,
+                                     optimizer,
+                                     dataset)
         
         if epoch % 10 == 0:
-            print(log.format(epoch, best_val_acc, test_acc))
+            print(f"Train accuracy: {train_acc} Test accuracy: {test_acc}")
 
-prepare_datasets()
-
+#actual_dataset = get_cora_dataset()
 dataset = get_cora_dataset()
-model = get_graphsage_model(dataset,
+model = get_proposed_model(dataset,
                             DEVICE)
+print(model)
 
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, weight_decay=5e-2)
 
 train_and_show_stat(100,
                     model,
