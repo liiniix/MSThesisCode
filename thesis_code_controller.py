@@ -1,5 +1,5 @@
 import torch
-from DatasetController.dataset_controller import get_cora_dataset, get_proposed_dataset
+from DatasetController.dataset_controller import get_cora_dataset, get_proposed_dataset, get_citeseer_dataset, get_pubmed_dataset
 import torch.nn.functional as F
 from GraphSage.graph_sage_controller import get_graphsage_model
 from GCN.gcn_controller import get_gcn_model
@@ -61,26 +61,39 @@ def train_and_show_stat(num_epoch,
             print(f"Train accuracy: {train_acc} Test accuracy: {test_acc}")
 
 #actual_dataset = get_cora_dataset()
-dataset = get_cora_dataset()
+dataset = get_citeseer_dataset()
 model = get_proposed_model(dataset,
-                            DEVICE)
+                            DEVICE,
+                            num_layers=3)
 print(model)
 
 optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, weight_decay=5e-2)
 
-train_and_show_stat(100,
+train_and_show_stat(200,
                     model,
                     optimizer,
                     dataset,
-                    "GraphSAGE")
+                    "Proposed")
 
 model = get_gcn_model(dataset,
                       DEVICE)
 
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
 
-train_and_show_stat(100,
+train_and_show_stat(200,
                     model,
                     optimizer,
                     dataset,
                     "GCN")
+
+
+model = get_graphsage_model(dataset,
+                      DEVICE)
+
+optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+
+train_and_show_stat(200,
+                    model,
+                    optimizer,
+                    dataset,
+                    "GraphSage")

@@ -3,9 +3,22 @@ from Proposed.proposed_dataset import ProposedDataset
 
 DATASET_ROOT_FOLDER = "Datasets"
 
-def get_cora_dataset():
+def get_citeseer_dataset():
     dataset = Planetoid(root = DATASET_ROOT_FOLDER,
                         name= "CiteSeer")
+    
+    return dataset
+
+def get_cora_dataset():
+    dataset = Planetoid(root = DATASET_ROOT_FOLDER,
+                        name= "Cora")
+    
+    return dataset
+
+
+def get_pubmed_dataset():
+    dataset = Planetoid(root = DATASET_ROOT_FOLDER,
+                        name= "PubMed")
     
     return dataset
 
