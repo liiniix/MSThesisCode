@@ -5,6 +5,8 @@ from GraphSage.graph_sage_controller import get_graphsage_model
 from GCN.gcn_controller import get_gcn_model
 from ProposedModel.proposed_model import get_proposed_model
 
+torch.manual_seed(15)
+
 DEVICE = torch.device('cuda'
                       if
                         torch.cuda.is_available()

@@ -33,28 +33,32 @@ class ProposedModel(torch.nn.Module):
         intermediate = int(dataset.num_features / 2)
 
         self.lin0 = torch.nn.Linear(dataset.num_features,
-                                    intermediate)#dataset.num_features/2)
-        torch.nn.init.kaiming_normal_(self.lin0.weight)
+                                    intermediate,
+                                    bias=False)#dataset.num_features/2)
+        #torch.nn.init.kaiming_normal_(self.lin0.weight)
         self.act0 = torch.nn.Sigmoid()
 
         self.lin1 = torch.nn.Linear(dataset.num_features ,
-                                    intermediate)#dataset.num_features/2)
-        torch.nn.init.kaiming_normal_(self.lin1.weight)
+                                    intermediate,
+                                    bias=False)#dataset.num_features/2)
+        #torch.nn.init.kaiming_normal_(self.lin1.weight)
         self.act1 = torch.nn.Sigmoid()
 
         self.lin2 = torch.nn.Linear(dataset.num_features ,
-                                    intermediate)#dataset.num_features/2)
-        torch.nn.init.kaiming_normal_(self.lin2.weight)
+                                    intermediate,
+                                    bias=False)#dataset.num_features/2)
+        #torch.nn.init.kaiming_normal_(self.lin2.weight)
         self.act2 = torch.nn.Sigmoid()
 
         self.lin3 = torch.nn.Linear(dataset.num_features ,
-                                    intermediate)#dataset.num_features/2)
-        torch.nn.init.kaiming_normal_(self.lin3.weight)
+                                    intermediate,
+                                    bias=False)#dataset.num_features/2)
+        #torch.nn.init.kaiming_normal_(self.lin3.weight)
         self.act3 = torch.nn.Sigmoid()
 
         self.final = torch.nn.Linear(intermediate,#dataset.num_features/2,
                                      dataset.num_classes)
-        torch.nn.init.kaiming_normal_(self.final.weight)
+        #torch.nn.init.kaiming_normal_(self.final.weight)
         self.act_final = torch.nn.Sigmoid()
 
 
@@ -83,6 +87,7 @@ class ProposedModel(torch.nn.Module):
 
                 self.flag = 1
             out0 = self.lin0(self.acc_hop_zero_featureMean)
+            #print(out0)
             act0_ = self.act0(out0)
 
             out1 = self.lin1(self.acc_hop_one_featureMean)
@@ -94,12 +99,12 @@ class ProposedModel(torch.nn.Module):
             out3 = self.lin3(self.acc_hop_three_featureMean)
             act3_ = self.act3(out3)
 
-            normalized_attention = F.softmax(self.attention)
+            normalized_attention = F.softmax(self.attention, dim=0)
 
             attended = act0_*normalized_attention[0,0] +\
-            act1_*normalized_attention[0,1] +\
-            act2_*normalized_attention[0,2] +\
-            act3_*normalized_attention[0,3]
+                       act1_*normalized_attention[0,1] +\
+                       act2_*normalized_attention[0,2] +\
+                       act3_*normalized_attention[0,3]
 
             out = self.final(attended)
 
