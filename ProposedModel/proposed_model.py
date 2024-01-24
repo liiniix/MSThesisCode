@@ -16,16 +16,19 @@ def pretty(d, indent=0):
 class ProposedModel(torch.nn.Module):
     def __init__(self,
                  dataset,
+                 DEVICE,
                  num_layers=1):
         super(ProposedModel, self).__init__()
 
         if num_layers < 1:
             num_layers = 1
         self.flag = 0
-        self.old = True
+        self.old = False
+        self.DEVICE = DEVICE
 
-        self.attention =  torch.nn.Parameter(torch.randn((1, 4), # <- start with random weights (this will get adjusted as the model learns)
-                                            dtype=torch.float), # <- PyTorch loves float32 by default
+        self.attention =  torch.nn.Parameter(torch.randn((1, 4),
+                                                         dtype=torch.float)
+                                                         .to(self.DEVICE),
                                             requires_grad=True)
 
         self.num_layers = num_layers
@@ -72,7 +75,7 @@ class ProposedModel(torch.nn.Module):
                 self.acc_hop_two_featureMean = []
                 self.acc_hop_three_featureMean = []
 
-                node_to_hop_to_nodesFeatureMean = get_node_to_hop_to_nodesFeatureMean(data, 3)
+                node_to_hop_to_nodesFeatureMean = get_node_to_hop_to_nodesFeatureMean(data, 3, self.DEVICE)
 
                 for (node, hop_to_nodesFeatureMean) in node_to_hop_to_nodesFeatureMean.items():
                     self.acc_hop_zero_featureMean.append(hop_to_nodesFeatureMean[0])
@@ -87,7 +90,6 @@ class ProposedModel(torch.nn.Module):
 
                 self.flag = 1
             out0 = self.lin0(self.acc_hop_zero_featureMean)
-            #print(out0)
             act0_ = self.act0(out0)
 
             out1 = self.lin1(self.acc_hop_one_featureMean)
@@ -115,38 +117,44 @@ class ProposedModel(torch.nn.Module):
             for hop in range(self.num_layers + 1):
                 self.acc_hop_level_featureMean[hop] = []
 
-            node_to_hop_to_nodesFeatureMean = get_node_to_hop_to_nodesFeatureMean(data, 3)
+            node_to_hop_to_nodesFeatureMean = get_node_to_hop_to_nodesFeatureMean(data, 3, self.DEVICE)
             
             for (node, hop_to_nodesFeatureMean) in node_to_hop_to_nodesFeatureMean.items():
                 for hop in range(self.num_layers+1):
                     self.acc_hop_level_featureMean[hop].append(hop_to_nodesFeatureMean[hop])
 
             for hop in range(self.num_layers+1):
-                self.acc_hop_level_featureMean[hop] = torch.stack(self.acc_hop_level_featureMean[hop])
+                self.acc_hop_level_featureMean[hop] = torch.stack(self.acc_hop_level_featureMean[hop]).to(self.DEVICE)
                 
             self.flag = 1
 
         out0 = self.lin0(self.acc_hop_level_featureMean[0])
-        act0 = self.act0(out0)
+        act0_ = self.act0(out0)
 
         out1 = self.lin1(self.acc_hop_level_featureMean[1])
-        act1 = self.act1(out1)
+        act1_ = self.act1(out1)
 
-        #out2 = self.lin2(self.acc_hop_level_featureMean[2])
-        #act2 = self.act2(out2)
+        out2 = self.lin2(self.acc_hop_level_featureMean[2])
+        act2_ = self.act2(out2)
 
-        #out3 = self.lin3(self.acc_hop_level_featureMean[3])
-        #act3 = self.act_final(out3)
+        out3 = self.lin3(self.acc_hop_level_featureMean[3])
+        act3_ = self.act_final(out3)
 
-        
+        normalized_attention = F.softmax(self.attention, dim=0)
 
-        out = self.final(self.act_final(act0+act1))#+act2+act3))
+        attended = act0_*normalized_attention[0,0] +\
+                       act1_*normalized_attention[0,1] +\
+                       act2_*normalized_attention[0,2] +\
+                       act3_*normalized_attention[0,3]
+
+        out = self.final(attended)
+
         return F.log_softmax(out, dim=1)
 
 
     
 
-def get_node_to_hop_to_nodesFeatureMean(data, max_k):
+def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE):
 
     x = data.x
     G = to_networkx(data)
@@ -159,12 +167,11 @@ def get_node_to_hop_to_nodesFeatureMean(data, max_k):
             k_hop_nodes = [key for (key, value) in cc.items() if value == k]
 
             k_hop_nodes_features = torch.stack(
-                                                    [torch.tensor(x[k_hop_node])
+                                                    [torch.tensor(x[k_hop_node]).to(DEVICE)
                                                     for k_hop_node in k_hop_nodes]
-                                            ) if k_hop_nodes else torch.stack([torch.zeros(x[0].shape)])
+                                            ) if k_hop_nodes else torch.stack([torch.zeros(x[0].shape)]).to(DEVICE)
             
-            k_hop_nodesFeatureMean = torch.mean(k_hop_nodes_features, dim=0)
-
+            k_hop_nodesFeatureMean = torch.mean(k_hop_nodes_features, dim=0).to(DEVICE)
             hop_to_nodesFeatureMean[k] = k_hop_nodesFeatureMean
         
         node_to_hop_to_nodesFeatureMean[node] = hop_to_nodesFeatureMean
@@ -176,6 +183,6 @@ def get_node_to_hop_to_nodesFeatureMean(data, max_k):
 def get_proposed_model(dataset,
                         device,
                         num_layers):
-    model = ProposedModel(dataset, num_layers)\
+    model = ProposedModel(dataset, device, num_layers)\
                     .to(device)
     return model
