@@ -33,6 +33,9 @@ class ProposedModel(torch.nn.Module):
 
         self.flag = 0
         self.old = False
+
+
+
         self.ultra_new = True
         self.DEVICE = DEVICE
         intermediate = int(dataset.num_features / 2)
@@ -171,6 +174,9 @@ class ProposedModel(torch.nn.Module):
             out = self.final(attended)
 
             return F.log_softmax(out, dim=1)
+        
+
+
     
         if self.ultra_new:
     
@@ -188,8 +194,6 @@ class ProposedModel(torch.nn.Module):
 
             return F.log_softmax(out, dim=1)
 
-
-    
 
 def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE):
 
