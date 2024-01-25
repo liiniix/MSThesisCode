@@ -4,6 +4,21 @@ import torch.nn.functional as F
 from GraphSage.graph_sage_controller import get_graphsage_model
 from GCN.gcn_controller import get_gcn_model
 from ProposedModel.proposed_model import get_proposed_model
+import wandb
+from datetime import datetime
+
+
+config = {
+    "hidden_layer_sizes": [32, 64],
+    "kernel_sizes": [3],
+    "activation": "ReLU",
+    "pool_sizes": [2],
+    "dropout": 0.5,
+    "num_classes": 10,
+}
+
+run = wandb.init(project="config_example", config=config)
+
 
 torch.manual_seed(15)
 
@@ -12,6 +27,8 @@ DEVICE = torch.device('cuda'
                         torch.cuda.is_available()
                       else
                         'cpu')
+
+run.name = f'check_wandb_{datetime.now()}_{DEVICE}'
 
 def __train(model,
             optimizer,
@@ -22,9 +39,13 @@ def __train(model,
     model.train()
     optimizer.zero_grad()
     out = model(data)
-    F.nll_loss(out[data.train_mask], data.y[data.train_mask])\
-     .backward()
+    loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
+    
+    loss.backward()
     optimizer.step()
+
+    loss_item = loss.item()
+    return loss_item
 
 
 def __test(model,
@@ -52,7 +73,7 @@ def train_and_show_stat(num_epoch,
     print(prelude)
 
     for epoch in range(num_epoch):
-        __train(model,
+        loss_item = __train(model,
                 optimizer,
                 dataset)
         train_acc, test_acc = __test(model,
@@ -60,9 +81,9 @@ def train_and_show_stat(num_epoch,
                                      dataset)
         
         if epoch % 10 == 0:
-            print(f"Train accuracy: {train_acc} Test accuracy: {test_acc}")
+            print(f"Train accuracy: {train_acc} Test accuracy: {test_acc} Loss: {loss_item}")
+            wandb.log({"train_acc": train_acc, "test_acc": test_acc, "loss": loss_item})
 
-#actual_dataset = get_cora_dataset()
 dataset = get_citeseer_dataset()
 model = get_proposed_model(dataset,
                             DEVICE,
