@@ -4,9 +4,8 @@ import torch.nn.functional as F
 from GraphSage.graph_sage_controller import get_graphsage_model
 from GCN.gcn_controller import get_gcn_model
 from ProposedModel.proposed_model import get_proposed_model
-import wandb
 from datetime import datetime
-
+from plot_helper import multilineplot, showProposedVsOther
 
 config = {
     "hidden_layer_sizes": [32, 64],
@@ -17,8 +16,6 @@ config = {
     "num_classes": 10,
 }
 
-run = wandb.init(project="config_example", config=config)
-
 
 torch.manual_seed(15)
 
@@ -28,7 +25,6 @@ DEVICE = torch.device('cuda'
                       else
                         'cpu')
 
-run.name = f'check_wandb_{datetime.now()}_{DEVICE}'
 
 def __train(model,
             optimizer,
@@ -69,54 +65,147 @@ def train_and_show_stat(num_epoch,
                         model,
                         optimizer,
                         dataset,
-                        prelude):
-    print(prelude)
-
+                        prelude,
+                        output,
+                        output_legend_prelude):
+    
     for epoch in range(num_epoch):
         loss_item = __train(model,
-                optimizer,
-                dataset)
+                            optimizer,
+                            dataset)
         train_acc, test_acc = __test(model,
                                      optimizer,
                                      dataset)
         
         if epoch % 10 == 0:
-            print(f"Train accuracy: {train_acc} Test accuracy: {test_acc} Loss: {loss_item}")
-            wandb.log({"train_acc": train_acc, "test_acc": test_acc, "loss": loss_item})
+            print(f"train accuracy: {train_acc} test accuracy: {test_acc} loss: {loss_item}")
+            
+            output[f"{output_legend_prelude} trian accuray"].append(train_acc)
+            output[f"{output_legend_prelude} test accuray"].append(test_acc)
+            output[f"{output_legend_prelude} loss"].append(loss_item)
+            output['x'].append(epoch)
 
 dataset = get_citeseer_dataset()
-model = get_proposed_model(dataset,
-                            DEVICE,
-                            num_layers=3)
-print(model)
-
-optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, weight_decay=5e-2)
-
-train_and_show_stat(200,
-                    model,
-                    optimizer,
-                    dataset,
-                    "Proposed")
-
-model = get_gcn_model(dataset,
-                      DEVICE)
-
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
-
-train_and_show_stat(200,
-                    model,
-                    optimizer,
-                    dataset,
-                    "GCN")
 
 
-model = get_graphsage_model(dataset,
-                      DEVICE)
 
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+def attention_vs_not():
+    output_legend_prelude = "not attention"
+    not_attention_output = {f"{output_legend_prelude} trian accuray":       [],
+                            f"{output_legend_prelude} test accuray":        [],
+                            f"{output_legend_prelude} loss":                [],
+                            'x':                                            []}
 
-train_and_show_stat(200,
-                    model,
-                    optimizer,
-                    dataset,
-                    "GraphSage")
+    model = get_proposed_model(dataset,
+                               DEVICE,
+                               num_layers=3)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-2)
+    train_and_show_stat(500,
+                        model,
+                        optimizer,
+                        dataset,
+                        "Proposed",
+                        not_attention_output,
+                        output_legend_prelude)
+    
+    print(not_attention_output)
+    multilineplot(not_attention_output, "not_attention")
+    
+
+    output_legend_prelude = "attention"
+    attention_output = {f"{output_legend_prelude} trian accuray":       [],
+                        f"{output_legend_prelude} test accuray":        [],
+                        f"{output_legend_prelude} loss":                [],
+                        'x':                                            []}
+    
+    model = get_proposed_model(dataset,
+                               DEVICE,
+                               num_layers=3,
+                               apply_attention=True)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, weight_decay=5e-2)
+    train_and_show_stat(500,
+                        model,
+                        optimizer,
+                        dataset,
+                        "Proposed",
+                        attention_output,
+                        output_legend_prelude)
+
+    multilineplot(attention_output, "attention")
+
+    
+
+    
+
+def proposed_vs_other():
+    output_legend_prelude = "proposed"
+    proposed_output = {f"{output_legend_prelude} trian accuray":       [],
+                        f"{output_legend_prelude} test accuray":        [],
+                        f"{output_legend_prelude} loss":                [],
+                        'x':                                            []}
+    model = get_proposed_model(dataset,
+                               DEVICE,
+                               num_layers=3,
+                               apply_attention=True)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, weight_decay=5e-2)
+    train_and_show_stat(500,
+                        model,
+                        optimizer,
+                        dataset,
+                        "Proposed",
+                        proposed_output,
+                        output_legend_prelude)
+
+
+
+
+
+
+
+    output_legend_prelude = "proposed"
+    gcn_output = {f"{output_legend_prelude} trian accuray":       [],
+                        f"{output_legend_prelude} test accuray":        [],
+                        f"{output_legend_prelude} loss":                [],
+                        'x':                                            []}
+    
+    model = get_gcn_model(dataset,
+                          DEVICE)
+    
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+    
+    train_and_show_stat(500,
+                        model,
+                        optimizer,
+                        dataset,
+                        "GCN",
+                        gcn_output,
+                        output_legend_prelude)
+    
+
+
+    output_legend_prelude = "graphsage"
+    graphsage_output = {f"{output_legend_prelude} trian accuray":       [],
+                        f"{output_legend_prelude} test accuray":        [],
+                        f"{output_legend_prelude} loss":                [],
+                        'x':                                            []}
+    
+    model = get_graphsage_model(dataset,
+                        DEVICE)
+    
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+    
+    train_and_show_stat(500,
+                      model,
+                      optimizer,
+                      dataset,
+                      "GraphSage",
+                        graphsage_output,
+                        output_legend_prelude)
+
+    showProposedVsOther(proposed_output, gcn_output, graphsage_output)
+
+
+
+#attention_vs_not()
+
+proposed_vs_other()
