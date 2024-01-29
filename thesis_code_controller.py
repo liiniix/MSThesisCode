@@ -5,19 +5,11 @@ from GraphSage.graph_sage_controller import get_graphsage_model
 from GCN.gcn_controller import get_gcn_model
 from ProposedModel.proposed_model import get_proposed_model
 from datetime import datetime
-from plot_helper import multilineplot, showProposedVsOther
-
-config = {
-    "hidden_layer_sizes": [32, 64],
-    "kernel_sizes": [3],
-    "activation": "ReLU",
-    "pool_sizes": [2],
-    "dropout": 0.5,
-    "num_classes": 10,
-}
+from plot_helper import multilineplot, showProposedVsOther, compare_outputs
 
 
 torch.manual_seed(15)
+is_wandb_initaited = False
 
 DEVICE = torch.device('cuda'
                       if
@@ -80,9 +72,9 @@ def train_and_show_stat(num_epoch,
         if epoch % 10 == 0:
             print(f"train accuracy: {train_acc} test accuracy: {test_acc} loss: {loss_item}")
             
-            output[f"{output_legend_prelude} trian accuray"].append(train_acc)
-            output[f"{output_legend_prelude} test accuray"].append(test_acc)
-            output[f"{output_legend_prelude} loss"].append(loss_item)
+            output[f"train accuracy"].append(train_acc)
+            output[f"test accuracy"].append(test_acc)
+            output[f"loss"].append(loss_item)
             output['x'].append(epoch)
 
 dataset = get_citeseer_dataset()
@@ -91,7 +83,7 @@ dataset = get_citeseer_dataset()
 
 def attention_vs_not():
     output_legend_prelude = "not attention"
-    not_attention_output = {f"{output_legend_prelude} trian accuray":       [],
+    not_attention_output = {f"{output_legend_prelude} train accuray":       [],
                             f"{output_legend_prelude} test accuray":        [],
                             f"{output_legend_prelude} loss":                [],
                             'x':                                            []}
@@ -113,7 +105,7 @@ def attention_vs_not():
     
 
     output_legend_prelude = "attention"
-    attention_output = {f"{output_legend_prelude} trian accuray":       [],
+    attention_output = {f"{output_legend_prelude} train accuray":       [],
                         f"{output_legend_prelude} test accuray":        [],
                         f"{output_legend_prelude} loss":                [],
                         'x':                                            []}
@@ -133,22 +125,22 @@ def attention_vs_not():
 
     multilineplot(attention_output, "attention")
 
-    
 
     
 
 def proposed_vs_other():
+    combined_num_epoch = 700
     output_legend_prelude = "proposed"
-    proposed_output = {f"{output_legend_prelude} trian accuray":       [],
-                        f"{output_legend_prelude} test accuray":        [],
-                        f"{output_legend_prelude} loss":                [],
-                        'x':                                            []}
+    proposed_output = {f"train accuracy":       [],
+                       f"test accuracy":        [],
+                       f"loss":                [],
+                       'x':                                            []}
     model = get_proposed_model(dataset,
                                DEVICE,
                                num_layers=3,
                                apply_attention=True)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, weight_decay=5e-2)
-    train_and_show_stat(500,
+    train_and_show_stat(combined_num_epoch,
                         model,
                         optimizer,
                         dataset,
@@ -162,10 +154,10 @@ def proposed_vs_other():
 
 
 
-    output_legend_prelude = "proposed"
-    gcn_output = {f"{output_legend_prelude} trian accuray":       [],
-                        f"{output_legend_prelude} test accuray":        [],
-                        f"{output_legend_prelude} loss":                [],
+    output_legend_prelude = "gcn"
+    gcn_output = {f"train accuracy":       [],
+                        f"test accuracy":        [],
+                        f"loss":                [],
                         'x':                                            []}
     
     model = get_gcn_model(dataset,
@@ -173,7 +165,7 @@ def proposed_vs_other():
     
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
     
-    train_and_show_stat(500,
+    train_and_show_stat(combined_num_epoch,
                         model,
                         optimizer,
                         dataset,
@@ -184,9 +176,9 @@ def proposed_vs_other():
 
 
     output_legend_prelude = "graphsage"
-    graphsage_output = {f"{output_legend_prelude} trian accuray":       [],
-                        f"{output_legend_prelude} test accuray":        [],
-                        f"{output_legend_prelude} loss":                [],
+    graphsage_output = {f"train accuracy":       [],
+                        f"test accuracy":        [],
+                        f"loss":                [],
                         'x':                                            []}
     
     model = get_graphsage_model(dataset,
@@ -194,7 +186,7 @@ def proposed_vs_other():
     
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
     
-    train_and_show_stat(500,
+    train_and_show_stat(combined_num_epoch,
                       model,
                       optimizer,
                       dataset,
@@ -202,7 +194,9 @@ def proposed_vs_other():
                         graphsage_output,
                         output_legend_prelude)
 
-    showProposedVsOther(proposed_output, gcn_output, graphsage_output)
+    #showProposedVsOther(proposed_output, gcn_output, graphsage_output)
+    compare_outputs(["proposed", "gcn", "graphsage"],
+                    [proposed_output, gcn_output, graphsage_output])
 
 
 

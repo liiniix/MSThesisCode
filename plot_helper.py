@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+import wandb
+from datetime import datetime
 
 def multilineplot(data, filename):
     '''
@@ -45,3 +47,53 @@ def showProposedVsOther(data1, data2, data3):
     plt.legend()
     plt.savefig("showProposedVsOther.png")
     plt.clf()
+
+
+def initiate_wandb():
+    
+    config = {
+        "hidden_layer_sizes": [32, 64],
+        "kernel_sizes": [3],
+        "activation": "ReLU",
+        "pool_sizes": [2],
+        "dropout": 0.5,
+        "num_classes": 10,
+    }
+
+    run = wandb.init(project="MSThesisCode", config=config)
+
+    run.name = f'msthesiscode_{datetime.now()}'
+
+
+def compare_outputs(preludes, data):
+    initiate_wandb()
+
+    print(data)
+
+
+    ys_train_acc = [dat['train accuracy'] for dat in data]
+    ys_test_acc = [dat['test accuracy'] for dat in data]
+    ys_loss = [dat['loss'] for dat in data]
+    xs = data[0]['x']
+
+    wandb.log({"train acc" : wandb.plot.line_series(
+                       xs=xs,
+                       ys=ys_train_acc,
+                       keys=preludes,
+                       title="Train Acc",
+                       xname="x units")})
+
+    
+    wandb.log({"test acc" : wandb.plot.line_series(
+                       xs=xs,
+                       ys=ys_test_acc,
+                       keys=preludes,
+                       title="Test Acc",
+                       xname="x units")})
+    
+    wandb.log({"loss" : wandb.plot.line_series(
+                       xs=xs,
+                       ys=ys_loss,
+                       keys=preludes,
+                       title="Loss",
+                       xname="x units")})
