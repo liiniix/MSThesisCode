@@ -68,7 +68,7 @@ def initiate_wandb():
 def compare_outputs(preludes, data):
     initiate_wandb()
 
-    print(data)
+    #print(data)
 
 
     ys_train_acc = [dat['train accuracy'] for dat in data]

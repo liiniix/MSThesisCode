@@ -3,6 +3,7 @@ from DatasetController.dataset_controller import get_cora_dataset, get_proposed_
 import torch.nn.functional as F
 from GraphSage.graph_sage_controller import get_graphsage_model
 from GCN.gcn_controller import get_gcn_model
+from GAT.gat_controller import get_gat_model
 from ProposedModel.proposed_model import get_proposed_model
 from datetime import datetime
 from plot_helper import multilineplot, showProposedVsOther, compare_outputs
@@ -175,6 +176,9 @@ def proposed_vs_other():
     
 
 
+
+
+
     output_legend_prelude = "graphsage"
     graphsage_output = {f"train accuracy":       [],
                         f"test accuracy":        [],
@@ -193,10 +197,39 @@ def proposed_vs_other():
                       "GraphSage",
                         graphsage_output,
                         output_legend_prelude)
+    
+
+
+
+
+
+
+
+
+
+    
+    output_legend_prelude = "gat"
+    gat_output = {f"train accuracy":       [],
+                        f"test accuracy":        [],
+                        f"loss":                [],
+                        'x':                                            []}
+    
+    model = get_gat_model(dataset,
+                        DEVICE)
+    
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+    
+    train_and_show_stat(combined_num_epoch,
+                      model,
+                      optimizer,
+                      dataset,
+                      "GAT",
+                        gat_output,
+                        output_legend_prelude)
 
     #showProposedVsOther(proposed_output, gcn_output, graphsage_output)
-    compare_outputs(["proposed", "gcn", "graphsage"],
-                    [proposed_output, gcn_output, graphsage_output])
+    compare_outputs(["proposed", "gcn", "graphsage", "gat"],
+                    [proposed_output, gcn_output, graphsage_output, gat_output])
 
 
 
