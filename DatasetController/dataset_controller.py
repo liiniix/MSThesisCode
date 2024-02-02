@@ -5,20 +5,23 @@ DATASET_ROOT_FOLDER = "Datasets"
 
 def get_citeseer_dataset():
     dataset = Planetoid(root = DATASET_ROOT_FOLDER,
-                        name= "CiteSeer")
+                        name= "CiteSeer",
+                        split='random')
     
     return dataset
 
 def get_cora_dataset():
     dataset = Planetoid(root = DATASET_ROOT_FOLDER,
-                        name= "Cora")
+                        name= "Cora",
+                        split='random')
     
     return dataset
 
 
 def get_pubmed_dataset():
     dataset = Planetoid(root = DATASET_ROOT_FOLDER,
-                        name= "PubMed")
+                        name= "PubMed",
+                        split='random')
     
     return dataset
 
