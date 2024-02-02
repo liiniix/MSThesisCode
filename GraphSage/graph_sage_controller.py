@@ -9,7 +9,7 @@ class GraphSAGEModel(torch.nn.Module):
         
         self.graph_sage = GraphSAGE(dataset.num_features,
                                     dataset.num_classes,
-                                    num_layers=3,
+                                    num_layers=5,
                                     aggr="max")
 
     def forward(self, data):

@@ -9,7 +9,7 @@ class GCNModel(torch.nn.Module):
         
         self.gcn = GCN(dataset.num_features,
                        dataset.num_classes,
-                       num_layers = 3)
+                       num_layers = 5)
 
     def forward(self, data):
         x, edge_index = data.x, data.edge_index

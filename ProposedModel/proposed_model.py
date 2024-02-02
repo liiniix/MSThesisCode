@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from torch_geometric.utils.convert import to_networkx
 from torch_geometric.data import Data
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 def pretty(d, indent=0):
    for key, value in d.items():
@@ -63,7 +64,7 @@ class ProposedModel(torch.nn.Module):
             for hop in range(self.num_layers + 1):
                 self.acc_hop_level_featureMean[hop] = []
 
-            node_to_hop_to_nodesFeatureMean = get_node_to_hop_to_nodesFeatureMean(data, 3, self.DEVICE)
+            node_to_hop_to_nodesFeatureMean = get_node_to_hop_to_nodesFeatureMean(data, self.num_layers, self.DEVICE)
             
             for (node, hop_to_nodesFeatureMean) in node_to_hop_to_nodesFeatureMean.items():
                 for hop in range(self.num_layers+1):
@@ -102,23 +103,56 @@ class ProposedModel(torch.nn.Module):
 
 def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE):
 
-    x = data.x
+    x = data.x.to(DEVICE)
     G = to_networkx(data)
     node_to_hop_to_nodesFeatureMean = {}
     hop_to_nodesFeatureMean = {}
     
-    for node in G.nodes:
+    for node in tqdm(G.nodes):
         cc = nx.single_source_shortest_path_length(G, node, cutoff=max_k)
         for k in range(max_k+1):
             k_hop_nodes = [key for (key, value) in cc.items() if value == k]
 
-            k_hop_nodes_features = torch.stack(
-                                                    [torch.tensor(x[k_hop_node]).to(DEVICE)
-                                                    for k_hop_node in k_hop_nodes]
-                                            ) if k_hop_nodes else torch.stack([torch.zeros(x[0].shape)]).to(DEVICE)
+            k_hop_nodesFeatureMean = torch.stack([torch.zeros(x[0].shape)]).to(DEVICE)
+
+            if k_hop_nodes:
+
+                k_hop_nodes_index = torch.tensor(k_hop_nodes).to(DEVICE)
+                k_hop_mask = torch.zeros(x.shape[0], dtype=torch.bool, device=DEVICE)\
+                                    .scatter_(0, k_hop_nodes_index, True)
+                
+            k_hop_nodesFeatureMean = torch.mean(x[k_hop_mask], dim=0)
+
+
+            #k_hop_nodes_features = torch.stack(
+            #                                        [torch.tensor(x[k_hop_node]).to(DEVICE)
+            #                                        for k_hop_node in k_hop_nodes]
+            #                                ) if k_hop_nodes else torch.stack([torch.zeros(x[0].shape)]).to(DEVICE)
+           #
+            #k_hop_nodesFeatureMean = torch.mean(k_hop_nodes_features, dim=0).to(DEVICE)
+
+
+
+
+
+
+            #k_hop_nodesFeatureMean = torch.zeros(x[0].shape).to(DEVICE)
+
+            #x_dev = x.to(DEVICE)
+
+
+            #for k_hop_node in k_hop_nodes:
+            #    k_hop_nodesFeatureMean += torch.div(x_dev[k_hop_node], len(k_hop_nodes))
+
+
+
             
-            k_hop_nodesFeatureMean = torch.mean(k_hop_nodes_features, dim=0).to(DEVICE)
+
             hop_to_nodesFeatureMean[k] = k_hop_nodesFeatureMean
+
+            
+            
+            
         
         node_to_hop_to_nodesFeatureMean[node] = hop_to_nodesFeatureMean
         hop_to_nodesFeatureMean = {}

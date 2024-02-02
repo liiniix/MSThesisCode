@@ -1,5 +1,5 @@
 import torch
-from DatasetController.dataset_controller import get_cora_dataset, get_proposed_dataset, get_citeseer_dataset, get_pubmed_dataset
+from DatasetController.dataset_controller import get_cora_dataset, get_proposed_dataset, get_citeseer_dataset, get_pubmed_dataset, get_nell_dataset
 import torch.nn.functional as F
 from GraphSage.graph_sage_controller import get_graphsage_model
 from GCN.gcn_controller import get_gcn_model
@@ -78,7 +78,7 @@ def train_and_show_stat(num_epoch,
             output[f"loss"].append(loss_item)
             output['x'].append(epoch)
 
-dataset = get_citeseer_dataset()
+dataset = get_pubmed_dataset()
 
 
 
@@ -138,9 +138,9 @@ def proposed_vs_other():
                        'x':                                            []}
     model = get_proposed_model(dataset,
                                DEVICE,
-                               num_layers=3,
+                               num_layers=5,
                                apply_attention=True)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, weight_decay=5e-2)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-2)
     train_and_show_stat(combined_num_epoch,
                         model,
                         optimizer,

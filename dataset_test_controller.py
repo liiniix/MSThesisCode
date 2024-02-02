@@ -1,4 +1,4 @@
-from DatasetController.dataset_controller import get_cora_dataset, get_citeseer_dataset, get_pubmed_dataset
+from DatasetController.dataset_controller import get_cora_dataset, get_citeseer_dataset, get_pubmed_dataset, get_nell_dataset
 import torch_geometric.transforms as T
 
 
@@ -6,7 +6,8 @@ if __name__ == "__main__":
     datasets = [
         ("Cora", get_cora_dataset()),
         ("CiteSeer", get_citeseer_dataset()),
-        ("PubMed", get_pubmed_dataset())
+        ("PubMed", get_pubmed_dataset()),
+        ("NELL", get_nell_dataset())
     ]
 
     for dataset_name, dataset in datasets:
