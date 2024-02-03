@@ -80,7 +80,7 @@ def train_and_show_stat(num_epoch,
             output[f"loss"].append(loss_item)
             output['x'].append(epoch)
 
-dataset = get_cora_dataset()
+dataset = get_citeseer_dataset()
 
 
 
@@ -132,7 +132,7 @@ def attention_vs_not():
     
 
 def proposed_vs_other():
-    combined_num_epoch = 300
+    combined_num_epoch = 700
     output_legend_prelude = "proposed"
     proposed_output = {f"train accuracy":       [],
                        f"test accuracy":        [],
@@ -140,9 +140,9 @@ def proposed_vs_other():
                        'x':                                            []}
     model = get_proposed_model(dataset,
                                DEVICE,
-                               num_layers=5,
+                               num_layers=3,
                                apply_attention=True)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-2)
+    optimizer = torch.optim.Adam(model.parameters(), lr=4.5030759946217534e-05, weight_decay=5e-2)
     train_and_show_stat(combined_num_epoch,
                         model,
                         optimizer,
@@ -164,9 +164,10 @@ def proposed_vs_other():
                         'x':                                            []}
     
     model = get_gcn_model(dataset,
-                          DEVICE)
+                          DEVICE,
+                          num_layers=2)
     
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+    optimizer = torch.optim.RMSprop(model.parameters(), lr=0.014777800863377434, weight_decay=5e-4)
     
     train_and_show_stat(combined_num_epoch,
                         model,
@@ -189,9 +190,9 @@ def proposed_vs_other():
     
     model = get_graphsage_model(dataset,
                         DEVICE,
-                        num_layers=1)
+                        num_layers=0)
     
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.05307488299759303, weight_decay=5e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0841356193675493, weight_decay=5e-4)
     
     train_and_show_stat(combined_num_epoch,
                       model,
@@ -218,9 +219,10 @@ def proposed_vs_other():
                         'x':                                            []}
     
     model = get_gat_model(dataset,
-                        DEVICE)
+                        DEVICE,
+                        num_layers=0)
     
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.06046004670726685, weight_decay=5e-4)
     
     train_and_show_stat(combined_num_epoch,
                       model,

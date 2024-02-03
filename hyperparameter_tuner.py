@@ -62,11 +62,29 @@ def objective(trial):
 
     num_layers = trial.suggest_int("num_layers", 0, 10)
 
-    model = get_proposed_model(dataset,
+    #model = get_proposed_model(dataset,
+    #                           DEVICE,
+    #                           num_layers,
+    #                           apply_attention=True, optuna_trial=trial,
+    #                           cache_to_pass_between_trials=cache_to_pass_between_trials)
+    #
+    #model = get_gcn_model(dataset,
+    #                           DEVICE,
+    #                           num_layers,
+    #                           optuna_trial=trial)
+
+    #model = get_graphsage_model(dataset,
+    #                           DEVICE,
+    #                           num_layers,
+    #                           optuna_trial=trial)
+    
+    model = get_gat_model(dataset,
                                DEVICE,
                                num_layers,
-                               apply_attention=True, optuna_trial=trial,
-                               cache_to_pass_between_trials=cache_to_pass_between_trials)
+                               optuna_trial=trial)
+
+
+
 
     optimizer_name = trial.suggest_categorical("optimizer", ["Adam", "RMSprop", "SGD"])
     lr = trial.suggest_float("lr", 1e-5, 1e-1, log=True)

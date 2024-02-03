@@ -71,10 +71,11 @@ class ProposedModel(torch.nn.Module):
             for hop in range(self.num_layers + 1):
                 self.acc_hop_level_featureMean[hop] = []
 
-            node_to_hop_to_nodesFeatureMean = self.cache_to_pass_between_trials[self.num_layers] if self.num_layers in self.cache_to_pass_between_trials\
+
+            node_to_hop_to_nodesFeatureMean = self.cache_to_pass_between_trials[self.num_layers] if self.cache_to_pass_between_trials is not None and self.num_layers in self.cache_to_pass_between_trials\
                                                 else get_node_to_hop_to_nodesFeatureMean(data, self.num_layers, self.DEVICE)
             
-            if self.num_layers not in self.cache_to_pass_between_trials:
+            if self.cache_to_pass_between_trials is not None and self.num_layers not in self.cache_to_pass_between_trials:
                 self.cache_to_pass_between_trials[self.num_layers] = node_to_hop_to_nodesFeatureMean 
             
             for (node, hop_to_nodesFeatureMean) in node_to_hop_to_nodesFeatureMean.items():
