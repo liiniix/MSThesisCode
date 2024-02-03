@@ -14,6 +14,7 @@ if __name__ == "__main__":
         
         print(f"{dataset_name} has {dataset.len()} objects,\
                                    {dataset[0].num_nodes} nodes,\
+                                   {dataset.num_classes} nodes,\
                                    {dataset.num_features} features\
                                    {len(dataset[0].x[dataset[0].train_mask])} train mask,\
                                    {len(dataset[0].x[dataset[0].val_mask])} val mask,\

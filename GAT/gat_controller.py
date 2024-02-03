@@ -11,7 +11,7 @@ class GATModel(torch.nn.Module):
                        dataset.num_classes,
                        num_layers=5,
                        aggr="max",
-                       heads=3)
+                       heads=dataset.num_classes)
 
     def forward(self, data):
         x, edge_index = data.x, data.edge_index

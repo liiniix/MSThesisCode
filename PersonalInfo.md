@@ -115,3 +115,7 @@ C:\Users\Masud Karim>
 
 
 
+
+
+
+`conda install -c conda-forge optuna`

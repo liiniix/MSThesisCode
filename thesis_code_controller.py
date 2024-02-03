@@ -47,12 +47,14 @@ def __test(model,
     model.eval()
     pred = model(data).argmax(dim=1)
     train_correct = (pred[data.train_mask] == data.y[data.train_mask]).sum()
+    val_correct = (pred[data.val_mask] == data.y[data.val_mask]).sum()
     test_correct = (pred[data.test_mask] == data.y[data.test_mask]).sum()
 
     train_acc = int(train_correct) / int(data.train_mask.sum())
+    val_acc = int(val_correct) / int(data.val_mask.sum())
     test_acc = int(test_correct) / int(data.test_mask.sum())
     
-    return train_acc, test_acc
+    return train_acc, val_acc, test_acc
 
 def train_and_show_stat(num_epoch,
                         model,
@@ -66,19 +68,19 @@ def train_and_show_stat(num_epoch,
         loss_item = __train(model,
                             optimizer,
                             dataset)
-        train_acc, test_acc = __test(model,
+        train_acc, val_acc, test_acc = __test(model,
                                      optimizer,
                                      dataset)
         
         if epoch % 10 == 0:
-            print(f"train accuracy: {train_acc} test accuracy: {test_acc} loss: {loss_item}")
+            print(f"train accuracy: {train_acc} eal_accuracy:{val_acc} test accuracy: {test_acc} loss: {loss_item}")
             
             output[f"train accuracy"].append(train_acc)
             output[f"test accuracy"].append(test_acc)
             output[f"loss"].append(loss_item)
             output['x'].append(epoch)
 
-dataset = get_pubmed_dataset()
+dataset = get_cora_dataset()
 
 
 
@@ -130,7 +132,7 @@ def attention_vs_not():
     
 
 def proposed_vs_other():
-    combined_num_epoch = 700
+    combined_num_epoch = 300
     output_legend_prelude = "proposed"
     proposed_output = {f"train accuracy":       [],
                        f"test accuracy":        [],
@@ -186,9 +188,10 @@ def proposed_vs_other():
                         'x':                                            []}
     
     model = get_graphsage_model(dataset,
-                        DEVICE)
+                        DEVICE,
+                        num_layers=1)
     
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.05307488299759303, weight_decay=5e-4)
     
     train_and_show_stat(combined_num_epoch,
                       model,
