@@ -57,7 +57,7 @@ def objective(trial):
 
     n_epochs = 700
 
-    dataset = get_pubmed_dataset()
+    dataset = get_citeseer_dataset()
 
 
     num_layers = trial.suggest_int("num_layers", 0, 10)

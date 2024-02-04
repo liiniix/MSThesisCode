@@ -1,0 +1,155 @@
+- My Proposed Method
+    - PubMed
+        - Study statistics:
+            - Number of finished trials:  1000
+            - Number of pruned trials:  961
+            - Number of complete trials:  39
+        - Best trial:
+            - Value:  0.784
+            - Params:
+                - num_layers: 3
+                - optimizer: Adam
+                - lr: 4.5030759946217534e-05
+
+                                                - GCN
+                                                    - PubMed
+                                                        - Study statistics:
+                                                            - Number of finished trials:  1000
+                                                            - Number of pruned trials:  955
+                                                            - Number of complete trials:  45
+                                                        - Best trial:
+                                                            - Value:  0.782
+                                                            - Params:
+                                                                - num_layers: 2
+                                                                - optimizer: RMSprop
+                                                                - lr: 0.014777800863377434
+
+                                                                                                - GraphSage
+                                                                                                    - PubMed
+                                                                                                        - Study statistics:
+                                                                                                            - Number of finished trials:  1000
+                                                                                                            - Number of pruned trials:  916
+                                                                                                            - Number of complete trials:  84
+                                                                                                            - Best trial:
+                                                                                                                - Value:  0.77
+                                                                                                            - Params:
+                                                                                                                - num_layers: 0
+                                                                                                                - optimizer: Adam
+                                                                                                                - lr: 0.0841356193675493
+
+                                                                                                                                                - GAT
+                                                                                                                                                    - PubMed
+                                                                                                                                                        - Study statistics:
+                                                                                                                                                            - Number of finished trials:  1000
+                                                                                                                                                            - Number of pruned trials:  887
+                                                                                                                                                            - Number of complete trials:  113
+                                                                                                                                                        - Best trial:
+                                                                                                                                                            - Value:  0.688
+                                                                                                                                                        - Params:
+                                                                                                                                                            - num_layers: 0
+                                                                                                                                                            - optimizer: Adam
+                                                                                                                                                            - lr: 0.06046004670726685
+
+- My Proposed Method
+    - Cora
+        - Study statistics:
+            - Number of finished trials:  1000
+            - Number of pruned trials:  972
+            - Number of complete trials:  28
+        - Best trial:
+            - Value:  0.8
+        - Params:
+            - num_layers: 3
+            - optimizer: RMSprop
+            - lr: 0.0012158055945430746
+
+                                                - GCN
+                                                    - Cora
+                                                    Study statistics:
+                                                    Number of finished trials:  1000
+                                                    Number of pruned trials:  929
+                                                    Number of complete trials:  71
+                                                    Best trial:
+                                                    Value:  0.752
+                                                    Params:
+                                                        num_layers: 1
+                                                        optimizer: RMSprop
+                                                        lr: 0.01787802429918312
+
+
+                                                                                                - GraphSage
+                                                                                                    - Cora
+                                                                                                    Study statistics:
+                                                                                                    Number of finished trials:  1000
+                                                                                                    Number of pruned trials:  950
+                                                                                                    Number of complete trials:  50
+                                                                                                    Best trial:
+                                                                                                    Value:  0.774
+                                                                                                    Params:
+                                                                                                        num_layers: 0
+                                                                                                        optimizer: Adam
+                                                                                                        lr: 0.07057868038462287
+                                                                                                                                            - GAT
+                                                                                                                                                - Cora
+                                                                                                                                                    Study statistics:
+                                                                                                                                                Number of finished trials:  1000
+                                                                                                                                                Number of pruned trials:  892
+                                                                                                                                                Number of complete trials:  108
+                                                                                                                                                Best trial:
+                                                                                                                                                Value:  0.644
+                                                                                                                                                Params:
+                                                                                                                                                    num_layers: 0
+                                                                                                                                                    optimizer: RMSprop
+                                                                                                                                                    lr: 0.017528884704197677
+
+- My Proposed Method
+    - Citeseer
+    Study statistics:
+  Number of finished trials:  1000
+  Number of pruned trials:  971
+  Number of complete trials:  29
+Best trial:
+  Value:  0.688
+  Params:
+    num_layers: 2
+    optimizer: RMSprop
+    lr: 0.0004281008174729494
+
+                                                - GCN
+                                                    - Citeseer
+                                                        Study statistics: 
+                                                        Number of finished trials:  1000
+                                                        Number of pruned trials:  850
+                                                        Number of complete trials:  150
+                                                        Best trial:
+                                                        Value:  0.668
+                                                        Params: 
+                                                            num_layers: 0
+                                                            optimizer: RMSprop
+                                                            lr: 0.08429040893293606
+
+                                                                                                GraphSage
+                                                                                                - Citeseer
+                                                                                                Study statistics: 
+                                                                                                Number of finished trials:  1000
+                                                                                                Number of pruned trials:  899
+                                                                                                Number of complete trials:  101
+                                                                                                Best trial:
+                                                                                                Value:  0.662
+                                                                                                Params: 
+                                                                                                    num_layers: 0
+                                                                                                    optimizer: Adam
+                                                                                                    lr: 0.06528300147090395
+
+                                                                                                                                            GAT
+                                                                                                                                            - Citeseer
+                                                                                                                                            Study statistics:
+                                                                                                                                            Number of finished trials:  1000
+                                                                                                                                            Number of pruned trials:  859
+                                                                                                                                            Number of complete trials:  141
+                                                                                                                                            Best trial:
+                                                                                                                                            Value:  0.542
+                                                                                                                                            Params:
+                                                                                                                                                num_layers: 0
+                                                                                                                                                optimizer: RMSprop
+                                                                                                                                                lr: 0.01155950623173022

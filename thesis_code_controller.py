@@ -80,7 +80,7 @@ def train_and_show_stat(num_epoch,
             output[f"loss"].append(loss_item)
             output['x'].append(epoch)
 
-dataset = get_citeseer_dataset()
+dataset = get_pubmed_dataset()
 
 
 
@@ -140,9 +140,9 @@ def proposed_vs_other():
                        'x':                                            []}
     model = get_proposed_model(dataset,
                                DEVICE,
-                               num_layers=3,
+                               num_layers=7,
                                apply_attention=True)
-    optimizer = torch.optim.Adam(model.parameters(), lr=4.5030759946217534e-05, weight_decay=5e-2)
+    optimizer = torch.optim.Adam(model.parameters(), lr=.0004281008174729494, weight_decay=5e-2)
     train_and_show_stat(combined_num_epoch,
                         model,
                         optimizer,
@@ -165,9 +165,9 @@ def proposed_vs_other():
     
     model = get_gcn_model(dataset,
                           DEVICE,
-                          num_layers=2)
+                          num_layers=7)
     
-    optimizer = torch.optim.RMSprop(model.parameters(), lr=0.014777800863377434, weight_decay=5e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.016, weight_decay=5e-4)
     
     train_and_show_stat(combined_num_epoch,
                         model,
@@ -190,9 +190,9 @@ def proposed_vs_other():
     
     model = get_graphsage_model(dataset,
                         DEVICE,
-                        num_layers=0)
+                        num_layers=7)
     
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.0841356193675493, weight_decay=5e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
     
     train_and_show_stat(combined_num_epoch,
                       model,
@@ -220,9 +220,9 @@ def proposed_vs_other():
     
     model = get_gat_model(dataset,
                         DEVICE,
-                        num_layers=0)
+                        num_layers=7)
     
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.06046004670726685, weight_decay=5e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
     
     train_and_show_stat(combined_num_epoch,
                       model,
@@ -239,5 +239,12 @@ def proposed_vs_other():
 
 
 #attention_vs_not()
+
+#proposed_vs_other()
+
+
+#dataset = get_cora_dataset()
+#proposed_vs_other()
+
 
 proposed_vs_other()
