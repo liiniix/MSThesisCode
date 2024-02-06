@@ -73,7 +73,7 @@ def train_and_show_stat(num_epoch,
                                      dataset)
         
         if epoch % 10 == 0:
-            print(f"train accuracy: {train_acc} eal_accuracy:{val_acc} test accuracy: {test_acc} loss: {loss_item}")
+            print(f"train accuracy: {train_acc} val_accuracy:{val_acc} test accuracy: {test_acc} loss: {loss_item}")
             
             output[f"train accuracy"].append(train_acc)
             output[f"test accuracy"].append(test_acc)
@@ -134,15 +134,16 @@ def attention_vs_not():
 def proposed_vs_other():
     combined_num_epoch = 700
     output_legend_prelude = "proposed"
+    print(output_legend_prelude)
     proposed_output = {f"train accuracy":       [],
                        f"test accuracy":        [],
                        f"loss":                [],
                        'x':                                            []}
     model = get_proposed_model(dataset,
                                DEVICE,
-                               num_layers=7,
+                               num_layers=10,
                                apply_attention=True)
-    optimizer = torch.optim.Adam(model.parameters(), lr=.0004281008174729494, weight_decay=5e-2)
+    optimizer = torch.optim.Adam(model.parameters(), lr=.0007, weight_decay=5e-2)
     train_and_show_stat(combined_num_epoch,
                         model,
                         optimizer,
@@ -158,6 +159,7 @@ def proposed_vs_other():
 
 
     output_legend_prelude = "gcn"
+    print(output_legend_prelude)
     gcn_output = {f"train accuracy":       [],
                         f"test accuracy":        [],
                         f"loss":                [],
@@ -165,7 +167,7 @@ def proposed_vs_other():
     
     model = get_gcn_model(dataset,
                           DEVICE,
-                          num_layers=7)
+                          num_layers=10)
     
     optimizer = torch.optim.Adam(model.parameters(), lr=0.016, weight_decay=5e-4)
     
@@ -183,6 +185,7 @@ def proposed_vs_other():
 
 
     output_legend_prelude = "graphsage"
+    print(output_legend_prelude)
     graphsage_output = {f"train accuracy":       [],
                         f"test accuracy":        [],
                         f"loss":                [],
@@ -190,7 +193,7 @@ def proposed_vs_other():
     
     model = get_graphsage_model(dataset,
                         DEVICE,
-                        num_layers=7)
+                        num_layers=10)
     
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
     
@@ -213,6 +216,7 @@ def proposed_vs_other():
 
     
     output_legend_prelude = "gat"
+    print(output_legend_prelude)
     gat_output = {f"train accuracy":       [],
                         f"test accuracy":        [],
                         f"loss":                [],
@@ -220,7 +224,7 @@ def proposed_vs_other():
     
     model = get_gat_model(dataset,
                         DEVICE,
-                        num_layers=7)
+                        num_layers=10)
     
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
     
@@ -232,19 +236,8 @@ def proposed_vs_other():
                         gat_output,
                         output_legend_prelude)
 
-    #showProposedVsOther(proposed_output, gcn_output, graphsage_output)
     compare_outputs(["proposed", "gcn", "graphsage", "gat"],
                     [proposed_output, gcn_output, graphsage_output, gat_output])
-
-
-
-#attention_vs_not()
-
-#proposed_vs_other()
-
-
-#dataset = get_cora_dataset()
-#proposed_vs_other()
 
 
 proposed_vs_other()
