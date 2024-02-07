@@ -80,7 +80,7 @@ def train_and_show_stat(num_epoch,
             output[f"loss"].append(loss_item)
             output['x'].append(epoch)
 
-dataset = get_nell_dataset()
+dataset = get_pubmed_dataset()
 
 
 
@@ -132,6 +132,7 @@ def attention_vs_not():
     
 
 def proposed_vs_other():
+    num_layers = 10
     combined_num_epoch = 700
     output_legend_prelude = "proposed"
     print(output_legend_prelude)
@@ -141,9 +142,9 @@ def proposed_vs_other():
                        'x':                                            []}
     model = get_proposed_model(dataset,
                                DEVICE,
-                               num_layers=10,
+                               num_layers=num_layers,
                                apply_attention=True)
-    optimizer = torch.optim.Adam(model.parameters(), lr=.0007, weight_decay=5e-2)
+    optimizer = torch.optim.Adam(model.parameters(), lr=.0001, weight_decay=5e-2)
     train_and_show_stat(combined_num_epoch,
                         model,
                         optimizer,
@@ -167,7 +168,7 @@ def proposed_vs_other():
     
     model = get_gcn_model(dataset,
                           DEVICE,
-                          num_layers=10)
+                          num_layers=num_layers)
     
     optimizer = torch.optim.Adam(model.parameters(), lr=0.016, weight_decay=5e-4)
     
@@ -193,7 +194,7 @@ def proposed_vs_other():
     
     model = get_graphsage_model(dataset,
                         DEVICE,
-                        num_layers=10)
+                        num_layers=num_layers)
     
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
     
@@ -224,7 +225,7 @@ def proposed_vs_other():
     
     model = get_gat_model(dataset,
                         DEVICE,
-                        num_layers=10)
+                        num_layers=num_layers)
     
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
     
@@ -241,3 +242,4 @@ def proposed_vs_other():
 
 
 proposed_vs_other()
+
