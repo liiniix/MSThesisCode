@@ -6,7 +6,8 @@ if __name__ == "__main__":
     datasets = [
         ("Cora", get_cora_dataset()),
         ("CiteSeer", get_citeseer_dataset()),
-        ("PubMed", get_pubmed_dataset())
+        ("PubMed", get_pubmed_dataset(),
+        ("Nell", get_nell_dataset()))
     ]
 
     for dataset_name, dataset in datasets:
