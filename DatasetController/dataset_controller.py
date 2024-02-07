@@ -6,6 +6,7 @@ import torch
 
 
 DATASET_ROOT_FOLDER = "Datasets"
+DATASET_ROOT_FOLDER_FOR_NELL = "Datasets/NELL"
 
 def get_citeseer_dataset():
     dataset = Planetoid(root = DATASET_ROOT_FOLDER,
@@ -35,12 +36,13 @@ def get_nell_dataset():
     transform = T.RandomNodeSplit(split='random')
 
     dataset = NELL(root = DATASET_ROOT_FOLDER, transform=transform)
+    return dataset
 
-    data = Data(x=dataset[0].x.to_dense(),
-                edge_index=dataset[0].edge_index,
-                y=dataset[0].y)
+
+def get_in_memeory_nell_dataset():
+    dataset = InMemoryNellDataset(root = DATASET_ROOT_FOLDER_FOR_NELL)
     
-    return random_split(data)
+    return random_split(dataset, is_nell=True)
 
 
 def get_proposed_dataset():
@@ -52,7 +54,7 @@ def get_proposed_dataset():
 def random_split(data, num_train_per_class: int = 20, num_val: int = 500, is_nell=False):
     data.train_mask.fill_(False)
     for c in range(data.num_classes):
-        num_train_per_class = int(num_train_per_class * .1) if is_nell else num_train_per_class
+        num_train_per_class = 2 if is_nell else num_train_per_class
         idx = (data.y == c).nonzero(as_tuple=False).view(-1)
         idx = idx[torch.randperm(idx.size(0))[:num_train_per_class]]
         data.train_mask[idx] = True
@@ -67,3 +69,40 @@ def random_split(data, num_train_per_class: int = 20, num_val: int = 500, is_nel
     data.test_mask[remaining[num_val:]] = True
 
     return data
+
+
+
+
+import torch
+from torch_geometric.data import InMemoryDataset, Data
+
+
+class InMemoryNellDataset(InMemoryDataset):
+    def __init__(self, root, data, transform=None, pre_transform=None, pre_filter=None):
+        super().__init__(root, transform, pre_transform, pre_filter)
+        #self.load(self.processed_paths[0])
+        self.dataset = get_nell_dataset()
+        self.data, self.slices = torch.load(self.processed_paths[0])
+
+    @property
+    def raw_file_names(self):
+        return ['file.edges', 'file.x']
+
+    @property
+    def processed_file_names(self):
+        return ['data.pt']
+
+    def download(self):
+        pass
+
+    def process(self):
+        
+        
+        data = Data(x=self.dataset[0].x.to_dense(),
+                edge_index=self.dataset[0].edge_index,
+                y=self.dataset[0].y)
+        
+        data_list = [data]
+
+        #self.save(data, self.processed_paths[0])
+        torch.save(self.collate(data_list), self.processed_paths[0])

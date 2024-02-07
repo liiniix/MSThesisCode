@@ -80,7 +80,7 @@ def train_and_show_stat(num_epoch,
             output[f"loss"].append(loss_item)
             output['x'].append(epoch)
 
-dataset = get_pubmed_dataset()
+dataset = get_nell_dataset()
 
 
 
@@ -132,7 +132,7 @@ def attention_vs_not():
     
 
 def proposed_vs_other():
-    num_layers = 10
+    num_layers = 0
     combined_num_epoch = 700
     output_legend_prelude = "proposed"
     print(output_legend_prelude)
