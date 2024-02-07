@@ -80,7 +80,7 @@ def train_and_show_stat(num_epoch,
             output[f"loss"].append(loss_item)
             output['x'].append(epoch)
 
-dataset = get_pubmed_dataset()
+dataset = get_nell_dataset()
 
 
 
