@@ -18,7 +18,6 @@ DEVICE = torch.device('cuda'
                       else
                         'cpu')
 
-
 def __train(model,
             optimizer,
             dataset):
@@ -185,5 +184,5 @@ def proposed_vs_other():
                     [proposed_output, gcn_output, graphsage_output, gat_output])
 
 
-proposed_vs_other()
+#proposed_vs_other()
 

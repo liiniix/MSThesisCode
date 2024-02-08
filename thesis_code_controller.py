@@ -20,7 +20,7 @@ def get_accuracy_dependent_on_num_layers():
     layerwise_max_acc_for_graphsage = []
     layerwise_max_acc_for_gat = []
 
-    for num_layers in tqdm(range(21)):
+    for num_layers in tqdm(range(5)):
 
         proposed_output = train_val_test_model_and_return_result(dataset,
                                             DEVICE,
