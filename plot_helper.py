@@ -97,3 +97,41 @@ def compare_outputs(preludes, data):
                        keys=preludes,
                        title="Loss",
                        xname="x units")})
+    
+
+
+def show_layerwise_max_accuracy(layerwise_max_accuracy):
+    initiate_wandb()
+
+
+
+    xs = range(len(layerwise_max_accuracy))
+
+    wandb.log({"acc" : wandb.plot.line_series(
+                       xs=xs,
+                       ys=layerwise_max_accuracy[0],
+                       keys="Proposed",
+                       title="Test Acc",
+                       xname="x units")})
+
+    
+    wandb.log({"acc" : wandb.plot.line_series(
+                       xs=xs,
+                       ys=layerwise_max_accuracy[1],
+                       keys="GCN",
+                       title="Test Acc",
+                       xname="x units")})
+    
+    wandb.log({"acc" : wandb.plot.line_series(
+                       xs=xs,
+                       ys=layerwise_max_accuracy[2],
+                       keys="GraphSage",
+                       title="Test Acc",
+                       xname="x units")})
+    
+    wandb.log({"acc" : wandb.plot.line_series(
+                       xs=xs,
+                       ys=layerwise_max_accuracy[3],
+                       keys="GAT",
+                       title="Test Acc",
+                       xname="x units")})

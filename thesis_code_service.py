@@ -80,8 +80,21 @@ def train_and_show_stat(num_epoch,
             output[f"loss"].append(loss_item)
             output['x'].append(epoch)
 
+def get_dataset(dataset_name):
 
-dataset = get_cora_dataset()
+    if dataset_name=="cora":
+        dataset = get_cora_dataset()
+
+    elif dataset_name=="citeseer":
+        dataset = get_citeseer_dataset()
+
+    elif dataset_name == "pubmed":
+        dataset = get_pubmed_dataset()
+
+    elif dataset_name=="nell":
+        dataset = get_nell_dataset()
+
+    return dataset
 
 
 def train_val_test_model_and_return_result(dataset,
@@ -138,8 +151,10 @@ def train_val_test_model_and_return_result(dataset,
     
 
 def proposed_vs_other():
-    num_layers = 5
+    num_layers = 20
     combined_num_epoch = 800
+
+    dataset = get_dataset("cora")
 
     proposed_output = train_val_test_model_and_return_result(dataset,
                                            DEVICE,
