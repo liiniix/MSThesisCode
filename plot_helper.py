@@ -102,7 +102,7 @@ def show_layerwise_max_accuracy(layerwise_max_accuracy):
 
 
 
-    xs = range(len(layerwise_max_accuracy))
+    xs = range(len(layerwise_max_accuracy[0]))
 
     wandb.log({"acc" : wandb.plot.line_series(
                        xs=xs,

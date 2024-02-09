@@ -1,11 +1,11 @@
 import torch
-from thesis_code_service import get_dataset, train_val_test_model_and_return_result
+from thesis_code_service import get_dataset, train_val_test_model_and_return_result, get_hop_to_nodesFeatureMean_for_proposed_model
 from utility import make_code_reproducible, make_nvidia_faster_computation
 from plot_helper import show_layerwise_max_accuracy
 from tqdm import tqdm
 
 def get_accuracy_dependent_on_num_layers():
-    combined_num_epoch = 30
+    combined_num_epoch = 700
     print(combined_num_epoch)
     DEVICE = torch.device('cuda'
                       if
@@ -19,14 +19,21 @@ def get_accuracy_dependent_on_num_layers():
     layerwise_max_acc_for_gcn = []
     layerwise_max_acc_for_graphsage = []
     layerwise_max_acc_for_gat = []
+    
+    cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 20, DEVICE)
 
-    for num_layers in tqdm(range(5)):
+    for num_layers in tqdm(range(20)):
+        
+        
 
         proposed_output = train_val_test_model_and_return_result(dataset,
                                             DEVICE,
                                             num_layers,
                                             "proposed",
-                                            combined_num_epoch)
+                                            combined_num_epoch,
+                                            is_cached_for_inter_experiment=True,
+                                            is_request_for_cache=False,
+                                            cached_acc_hop_level_featureMean=cached_acc_hop_level_featureMean)
         layerwise_max_acc_for_proposed.append(
             max(proposed_output['test accuracy'])
         )
@@ -59,6 +66,7 @@ def get_accuracy_dependent_on_num_layers():
         layerwise_max_acc_for_gat.append(
             max(gat_output['test accuracy'])
         )
+        
 
     
     return [layerwise_max_acc_for_proposed,

@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from GraphSage.graph_sage_controller import get_graphsage_model
 from GCN.gcn_controller import get_gcn_model
 from GAT.gat_controller import get_gat_model
-from ProposedModel.proposed_model import get_proposed_model
+from ProposedModel.proposed_model import get_proposed_model, get_hop_to_nodesFeatureMean
 from datetime import datetime
 from plot_helper import multilineplot, showProposedVsOther, compare_outputs
 
@@ -96,11 +96,22 @@ def get_dataset(dataset_name):
     return dataset
 
 
+def get_hop_to_nodesFeatureMean_for_proposed_model(dataset, max_k, DEVICE):
+    data = dataset[0].to(DEVICE)
+    
+    return get_hop_to_nodesFeatureMean(
+        data,
+        max_k,
+        DEVICE
+    )
+
+
 def train_val_test_model_and_return_result(dataset,
                                            DEVICE,
                                            num_layers,
                                            model_name,
-                                           num_epoch):
+                                           num_epoch,
+                                           **kwargs):
     print(model_name)
 
     output = {
@@ -114,7 +125,8 @@ def train_val_test_model_and_return_result(dataset,
         model = get_proposed_model(dataset,
                                    DEVICE,
                                    num_layers=num_layers,
-                                   apply_attention=True)
+                                   apply_attention=True,
+                                   **kwargs)
         optimizer = torch.optim.Adam(model.parameters(), lr=.0001, weight_decay=5e-2)
     elif model_name == "gcn":
         model = get_gcn_model(dataset,
@@ -150,7 +162,7 @@ def train_val_test_model_and_return_result(dataset,
     
 
 def proposed_vs_other():
-    num_layers = 20
+    num_layers = 10
     combined_num_epoch = 800
 
     dataset = get_dataset("cora")

@@ -6,10 +6,6 @@ from torch_geometric.data import Data
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-
-#numLayer_wise_cache = {} # num_layer: acc_hop_level_featureMean
-
-
 def pretty(d, indent=0):
    for key, value in d.items():
       print('\t' * indent + str(key))
@@ -31,7 +27,9 @@ class ProposedModel(torch.nn.Module):
                  num_layers=1,
                  apply_attention=False,
                  trial=None,
-                 cache_to_pass_between_trials = None):
+                 is_cached_for_inter_experiment=False,
+                 is_request_for_cache=False,
+                 cached_acc_hop_level_featureMean=None):
         super(ProposedModel, self).__init__()
 
         if num_layers < 0:
@@ -40,8 +38,13 @@ class ProposedModel(torch.nn.Module):
         self.num_layers = num_layers
         self.apply_attention = apply_attention
 
-        self.flag = 0
-        self.cache_to_pass_between_trials = cache_to_pass_between_trials
+        self.is_saved_for_inter_epoch = False
+        self.is_request_for_cache = is_request_for_cache
+        self.cached_acc_hop_level_featureMean = cached_acc_hop_level_featureMean
+        
+        if is_cached_for_inter_experiment == True:
+            self.acc_hop_level_featureMean = cached_acc_hop_level_featureMean
+            self.is_saved_for_inter_epoch = True
 
         self.DEVICE = DEVICE
         intermediate = int(dataset.num_features / 2)
@@ -66,17 +69,13 @@ class ProposedModel(torch.nn.Module):
     def forward(self, data):
         x, edge_index = data.x, data.edge_index
 
-        if self.flag == 0:
+        if self.is_saved_for_inter_epoch == False:
             self.acc_hop_level_featureMean = {}
             for hop in range(self.num_layers + 1):
                 self.acc_hop_level_featureMean[hop] = []
 
 
-            node_to_hop_to_nodesFeatureMean = self.cache_to_pass_between_trials[self.num_layers] if self.cache_to_pass_between_trials is not None and self.num_layers in self.cache_to_pass_between_trials\
-                                                else get_node_to_hop_to_nodesFeatureMean(data, self.num_layers, self.DEVICE)
-            
-            if self.cache_to_pass_between_trials is not None and self.num_layers not in self.cache_to_pass_between_trials:
-                self.cache_to_pass_between_trials[self.num_layers] = node_to_hop_to_nodesFeatureMean 
+            node_to_hop_to_nodesFeatureMean = get_node_to_hop_to_nodesFeatureMean(data, self.num_layers, self.DEVICE)
             
             for (node, hop_to_nodesFeatureMean) in node_to_hop_to_nodesFeatureMean.items():
                 for hop in range(self.num_layers+1):
@@ -84,9 +83,11 @@ class ProposedModel(torch.nn.Module):
 
             for hop in range(self.num_layers+1):
                 self.acc_hop_level_featureMean[hop] = torch.stack(self.acc_hop_level_featureMean[hop]).to(self.DEVICE)
+            
+            if self.is_request_for_cache == True:
+                self.cached_acc_hop_level_featureMean = self.acc_hop_level_featureMean
                 
-                
-            self.flag = 1
+            self.is_saved_for_inter_epoch = True
 
     
     
@@ -134,43 +135,32 @@ def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE):
                 k_hop_mask = torch.zeros(x.shape[0], dtype=torch.bool, device=DEVICE)\
                                     .scatter_(0, k_hop_nodes_index, True)
                 
-            k_hop_nodesFeatureMean = torch.mean(x[k_hop_mask], dim=0)
-
-
-            #k_hop_nodes_features = torch.stack(
-            #                                        [torch.tensor(x[k_hop_node]).to(DEVICE)
-            #                                        for k_hop_node in k_hop_nodes]
-            #                                ) if k_hop_nodes else torch.stack([torch.zeros(x[0].shape)]).to(DEVICE)
-           #
-            #k_hop_nodesFeatureMean = torch.mean(k_hop_nodes_features, dim=0).to(DEVICE)
-
-
-
-
-
-
-            #k_hop_nodesFeatureMean = torch.zeros(x[0].shape).to(DEVICE)
-
-            #x_dev = x.to(DEVICE)
-
-
-            #for k_hop_node in k_hop_nodes:
-            #    k_hop_nodesFeatureMean += torch.div(x_dev[k_hop_node], len(k_hop_nodes))
-
-
-
-            
+            k_hop_nodesFeatureMean = torch.mean(x[k_hop_mask], dim=0)            
 
             hop_to_nodesFeatureMean[k] = k_hop_nodesFeatureMean
 
-            
-            
-            
         
         node_to_hop_to_nodesFeatureMean[node] = hop_to_nodesFeatureMean
         hop_to_nodesFeatureMean = {}
 
     return node_to_hop_to_nodesFeatureMean
+
+def get_hop_to_nodesFeatureMean(data, max_k, DEVICE):
+    acc_hop_level_featureMean = {}
+    for hop in range(max_k + 1):
+        acc_hop_level_featureMean[hop] = []
+
+
+    node_to_hop_to_nodesFeatureMean = get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE)
+    
+    for (node, hop_to_nodesFeatureMean) in node_to_hop_to_nodesFeatureMean.items():
+        for hop in range(max_k+1):
+            acc_hop_level_featureMean[hop].append(hop_to_nodesFeatureMean[hop])
+
+    for hop in range(max_k+1):
+        acc_hop_level_featureMean[hop] = torch.stack(acc_hop_level_featureMean[hop]).to(DEVICE)
+        
+    return acc_hop_level_featureMean
 
 
 def get_proposed_model(dataset,
@@ -178,7 +168,7 @@ def get_proposed_model(dataset,
                         num_layers,
                         apply_attention=False,
                         optuna_trial=None,
-                        cache_to_pass_between_trials=None):
-    model = ProposedModel(dataset, device, num_layers, apply_attention=apply_attention, trial=optuna_trial, cache_to_pass_between_trials=cache_to_pass_between_trials)\
+                        **kwargs):
+    model = ProposedModel(dataset, device, num_layers, apply_attention=apply_attention, trial=optuna_trial, **kwargs)\
                     .to(device)
     return model
