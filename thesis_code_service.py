@@ -166,12 +166,14 @@ def proposed_vs_other():
     combined_num_epoch = 800
 
     dataset = get_dataset("cora")
+    cached_acc_hop_level_featureMean = get_hop_to_nodesFeatureMean_for_proposed_model(dataset, num_layers, DEVICE)
 
     proposed_output = train_val_test_model_and_return_result(dataset,
                                            DEVICE,
                                            num_layers,
                                            "proposed",
-                                           combined_num_epoch)
+                                           combined_num_epoch,
+                                           cached_acc_hop_level_featureMean=cached_acc_hop_level_featureMean)
 
     gcn_output = train_val_test_model_and_return_result(dataset,
                                            DEVICE,
@@ -196,5 +198,5 @@ def proposed_vs_other():
                     [proposed_output, gcn_output, graphsage_output, gat_output])
 
 
-#proposed_vs_other()
-
+if __name__ == "__main__":
+    proposed_vs_other()

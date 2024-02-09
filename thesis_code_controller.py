@@ -20,9 +20,9 @@ def get_accuracy_dependent_on_num_layers():
     layerwise_max_acc_for_graphsage = []
     layerwise_max_acc_for_gat = []
     
-    cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 20, DEVICE)
+    cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 17, DEVICE)
 
-    for num_layers in tqdm(range(20)):
+    for num_layers in tqdm(range(17)):
         
         
 
@@ -31,8 +31,6 @@ def get_accuracy_dependent_on_num_layers():
                                             num_layers,
                                             "proposed",
                                             combined_num_epoch,
-                                            is_cached_for_inter_experiment=True,
-                                            is_request_for_cache=False,
                                             cached_acc_hop_level_featureMean=cached_acc_hop_level_featureMean)
         layerwise_max_acc_for_proposed.append(
             max(proposed_output['test accuracy'])

@@ -27,8 +27,6 @@ class ProposedModel(torch.nn.Module):
                  num_layers=1,
                  apply_attention=False,
                  trial=None,
-                 is_cached_for_inter_experiment=False,
-                 is_request_for_cache=False,
                  cached_acc_hop_level_featureMean=None):
         super(ProposedModel, self).__init__()
 
@@ -38,15 +36,8 @@ class ProposedModel(torch.nn.Module):
         self.num_layers = num_layers
         self.apply_attention = apply_attention
 
-        self.is_saved_for_inter_epoch = False
-        self.is_request_for_cache = is_request_for_cache
-        self.cached_acc_hop_level_featureMean = cached_acc_hop_level_featureMean
-        
-        if is_cached_for_inter_experiment == True:
-            self.acc_hop_level_featureMean = cached_acc_hop_level_featureMean
-            self.is_saved_for_inter_epoch = True
-
         self.DEVICE = DEVICE
+        self.acc_hop_level_featureMean = cached_acc_hop_level_featureMean
         intermediate = int(dataset.num_features / 2)
 
         self.linears = torch.nn.ModuleList([get_block(dataset.num_features,
@@ -60,6 +51,9 @@ class ProposedModel(torch.nn.Module):
                                                             )
                                                                 .to(self.DEVICE),
                                                 requires_grad=True)
+            self.attention_amplifier = torch.nn.Parameter(torch.randn(1, dtype=torch.float)
+                                                          .to(self.DEVICE),
+                                                requires_grad=True)
 
         self.final = torch.nn.Linear(intermediate,
                                      dataset.num_classes)
@@ -68,28 +62,6 @@ class ProposedModel(torch.nn.Module):
 
     def forward(self, data):
         x, edge_index = data.x, data.edge_index
-
-        if self.is_saved_for_inter_epoch == False:
-            self.acc_hop_level_featureMean = {}
-            for hop in range(self.num_layers + 1):
-                self.acc_hop_level_featureMean[hop] = []
-
-
-            node_to_hop_to_nodesFeatureMean = get_node_to_hop_to_nodesFeatureMean(data, self.num_layers, self.DEVICE)
-            
-            for (node, hop_to_nodesFeatureMean) in node_to_hop_to_nodesFeatureMean.items():
-                for hop in range(self.num_layers+1):
-                    self.acc_hop_level_featureMean[hop].append(hop_to_nodesFeatureMean[hop])
-
-            for hop in range(self.num_layers+1):
-                self.acc_hop_level_featureMean[hop] = torch.stack(self.acc_hop_level_featureMean[hop]).to(self.DEVICE)
-            
-            if self.is_request_for_cache == True:
-                self.cached_acc_hop_level_featureMean = self.acc_hop_level_featureMean
-                
-            self.is_saved_for_inter_epoch = True
-
-    
     
         linears_output = [self.linears[i](self.acc_hop_level_featureMean[i]) for i in range(self.num_layers+1)]
         
@@ -100,7 +72,7 @@ class ProposedModel(torch.nn.Module):
                             .to(self.DEVICE)
 
             for i in range(self.num_layers+1):
-                attended += linears_output[i] * normalized_attention[0,i]
+                attended += linears_output[i] * normalized_attention[0,i] * self.attention_amplifier
         else:
             summed = torch.zeros(linears_output[0].shape)\
                             .to(self.DEVICE)
