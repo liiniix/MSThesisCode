@@ -137,7 +137,8 @@ def train_val_test_model_and_return_result(dataset,
     elif model_name == "graphsage":
         model = get_graphsage_model(dataset,
                         DEVICE,
-                        num_layers=num_layers)
+                        num_layers=num_layers,
+                                   **kwargs)
     
         optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
 

@@ -13,16 +13,17 @@ def get_accuracy_dependent_on_num_layers():
                       else
                         'cpu')
 
-    dataset = get_dataset("cora")
+    dataset = get_dataset("citeseer")
 
     layerwise_max_acc_for_proposed = []
     layerwise_max_acc_for_gcn = []
-    layerwise_max_acc_for_graphsage = []
+    layerwise_max_acc_for_graphsage_mean = []
+    layerwise_max_acc_for_graphsage_max = []
     layerwise_max_acc_for_gat = []
     
-    cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 17, DEVICE)
+    cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 30, DEVICE)
 
-    for num_layers in tqdm(range(17)):
+    for num_layers in tqdm(range(0, 30)):
         
         
 
@@ -44,15 +45,28 @@ def get_accuracy_dependent_on_num_layers():
         layerwise_max_acc_for_gcn.append(
             max(gcn_output['test accuracy'])
         )
-        
-        graphsage_output = train_val_test_model_and_return_result(dataset,
+        graphsage_output_mean = train_val_test_model_and_return_result(dataset,
                                             DEVICE,
                                             num_layers,
                                             "graphsage",
-                                            combined_num_epoch)
+                                            combined_num_epoch,
+                                            aggr="mean")
         
-        layerwise_max_acc_for_graphsage.append(
-            max(graphsage_output['test accuracy'])
+        layerwise_max_acc_for_graphsage_mean.append(
+            max(graphsage_output_mean['test accuracy'])
+        )
+        
+        
+        
+        graphsage_output_max = train_val_test_model_and_return_result(dataset,
+                                            DEVICE,
+                                            num_layers,
+                                            "graphsage",
+                                            combined_num_epoch,
+                                            aggr="max")
+        
+        layerwise_max_acc_for_graphsage_max.append(
+            max(graphsage_output_max['test accuracy'])
         )
         
         
@@ -69,7 +83,8 @@ def get_accuracy_dependent_on_num_layers():
     
     return [layerwise_max_acc_for_proposed,
             layerwise_max_acc_for_gcn,
-            layerwise_max_acc_for_graphsage,
+            layerwise_max_acc_for_graphsage_mean,
+            layerwise_max_acc_for_graphsage_max,
             layerwise_max_acc_for_gat]
 
 

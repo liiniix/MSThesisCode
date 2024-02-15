@@ -51,9 +51,6 @@ class ProposedModel(torch.nn.Module):
                                                             )
                                                                 .to(self.DEVICE),
                                                 requires_grad=True)
-            self.attention_amplifier = torch.nn.Parameter(torch.randn(1, dtype=torch.float)
-                                                          .to(self.DEVICE),
-                                                requires_grad=True)
 
         self.final = torch.nn.Linear(intermediate,
                                      dataset.num_classes)
@@ -72,7 +69,7 @@ class ProposedModel(torch.nn.Module):
                             .to(self.DEVICE)
 
             for i in range(self.num_layers+1):
-                attended += linears_output[i] * normalized_attention[0,i] * self.attention_amplifier
+                attended += linears_output[i] * normalized_attention[0,i]
         else:
             summed = torch.zeros(linears_output[0].shape)\
                             .to(self.DEVICE)
