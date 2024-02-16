@@ -13,7 +13,7 @@ def get_accuracy_dependent_on_num_layers():
                       else
                         'cpu')
 
-    dataset = get_dataset("citeseer")
+    dataset = get_dataset("pubmed")
 
     layerwise_max_acc_for_proposed = []
     layerwise_max_acc_for_gcn = []
