@@ -97,10 +97,22 @@ class InMemoryNellDataset(InMemoryDataset):
 
     def process(self):
         
+        dataset = get_nell_dataset()
         
-        data = Data(x=self.dataset[0].x.to_dense(),
-                edge_index=self.dataset[0].edge_index,
-                y=self.dataset[0].y)
+        y  = dataset[0].y
+        y_unique = y.unique()
+        to_be_replaced_with = torch.arange(0, y_unique.shape[0])
+        for i in range(y_unique.shape[0]):
+            y[y==y_unique[i]] = to_be_replaced_with[i]
+        
+        
+        data = Data(x=dataset[0].x.to_dense(),
+                edge_index=dataset[0].edge_index,
+                y=y)
+        data.train_mask = torch.zeros(dataset[0].num_nodes, dtype=torch.bool)
+        data.test_mask = torch.zeros(dataset[0].num_nodes, dtype=torch.bool)
+        data.val_mask = torch.zeros(dataset[0].num_nodes, dtype=torch.bool)
+        
         
         data_list = [data]
 
