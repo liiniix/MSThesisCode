@@ -1,5 +1,5 @@
 import torch
-from DatasetController.dataset_controller import get_cora_dataset, get_proposed_dataset, get_citeseer_dataset, get_pubmed_dataset, get_nell_dataset
+from DatasetController.dataset_controller import get_cora_dataset, get_proposed_dataset, get_citeseer_dataset, get_pubmed_dataset, get_in_memeory_nell_dataset
 import torch.nn.functional as F
 from GraphSage.graph_sage_controller import get_graphsage_model
 from GCN.gcn_controller import get_gcn_model
@@ -91,7 +91,7 @@ def get_dataset(dataset_name):
         dataset = get_pubmed_dataset()
 
     elif dataset_name=="nell":
-        dataset = get_nell_dataset()
+        dataset = get_in_memeory_nell_dataset()
 
     return dataset
 

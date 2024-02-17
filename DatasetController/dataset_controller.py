@@ -78,10 +78,10 @@ from torch_geometric.data import InMemoryDataset, Data
 
 
 class InMemoryNellDataset(InMemoryDataset):
-    def __init__(self, root, data, transform=None, pre_transform=None, pre_filter=None):
+    def __init__(self, root, transform=None, pre_transform=None, pre_filter=None):
         super().__init__(root, transform, pre_transform, pre_filter)
         #self.load(self.processed_paths[0])
-        self.dataset = get_nell_dataset()
+        
         self.data, self.slices = torch.load(self.processed_paths[0])
 
     @property
@@ -106,7 +106,7 @@ class InMemoryNellDataset(InMemoryDataset):
             y[y==y_unique[i]] = to_be_replaced_with[i]
         
         
-        data = Data(x=dataset[0].x.to_dense(),
+        data = Data(x=dataset[0].x,
                 edge_index=dataset[0].edge_index,
                 y=y)
         data.train_mask = torch.zeros(dataset[0].num_nodes, dtype=torch.bool)

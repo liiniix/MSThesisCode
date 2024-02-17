@@ -96,15 +96,15 @@ def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE):
         for k in range(max_k+1):
             k_hop_nodes = [key for (key, value) in cc.items() if value == k]
 
-            k_hop_nodesFeatureMean = torch.stack([torch.zeros(x[0].shape)]).to(DEVICE)
+            k_hop_nodesFeatureMean = torch.stack([torch.zeros(x[0].to_dense().shape)]).to(DEVICE)
 
             if k_hop_nodes:
 
                 k_hop_nodes_index = torch.tensor(k_hop_nodes).to(DEVICE)
-                k_hop_mask = torch.zeros(x.shape[0], dtype=torch.bool, device=DEVICE)\
+                k_hop_mask = torch.zeros(65755, dtype=torch.bool, device=DEVICE)\
                                     .scatter_(0, k_hop_nodes_index, True)
                 
-            k_hop_nodesFeatureMean = torch.mean(x[k_hop_mask], dim=0)            
+            k_hop_nodesFeatureMean = torch.mean(x[k_hop_mask].to_dense(), dim=0)            
 
             hop_to_nodesFeatureMean[k] = k_hop_nodesFeatureMean
 

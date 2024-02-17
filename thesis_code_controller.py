@@ -13,7 +13,7 @@ def get_accuracy_dependent_on_num_layers():
                       else
                         'cpu')
 
-    dataset = get_dataset("pubmed")
+    dataset = get_dataset("nell")
 
     layerwise_max_acc_for_proposed = []
     layerwise_max_acc_for_gcn = []
@@ -21,9 +21,9 @@ def get_accuracy_dependent_on_num_layers():
     layerwise_max_acc_for_graphsage_max = []
     layerwise_max_acc_for_gat = []
     
-    cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 30, DEVICE)
+    cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 1, DEVICE="cpu")
 
-    for num_layers in tqdm(range(0, 30)):
+    for num_layers in tqdm(range(0, 1)):
         
         
 
