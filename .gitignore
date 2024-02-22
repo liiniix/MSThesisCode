@@ -162,3 +162,5 @@ cython_debug/
 Datasets/
 PracticeByExample/data/
 wandb/
+*.json
+*.edgelist

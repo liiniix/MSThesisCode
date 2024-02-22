@@ -84,7 +84,7 @@ class ProposedModel(torch.nn.Module):
         return F.log_softmax(out, dim=1)
 
 
-def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE):
+def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE, json_node_hop_hopNodes=None):
 
     x = data.x.to(DEVICE)
     G = to_networkx(data)
@@ -92,19 +92,24 @@ def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE):
     hop_to_nodesFeatureMean = {}
     
     for node in tqdm(G.nodes):
-        cc = nx.single_source_shortest_path_length(G, node, cutoff=max_k)
+        if json_node_hop_hopNodes is None:
+            cc = nx.single_source_shortest_path_length(G, node, cutoff=max_k)
         for k in range(max_k+1):
-            k_hop_nodes = [key for (key, value) in cc.items() if value == k]
+            if json_node_hop_hopNodes:
+                k_hop_nodes = json_node_hop_hopNodes[str(node)][str(k)]
+                k_hop_nodes = [int(k_hop_node) for k_hop_node in k_hop_nodes]
+            else:
+                k_hop_nodes = [key for (key, value) in cc.items() if value == k]
 
-            k_hop_nodesFeatureMean = torch.stack([torch.zeros(x[0].to_dense().shape)]).to(DEVICE)
+            k_hop_nodesFeatureMean = torch.stack([torch.zeros(x[0].shape)]).to(DEVICE)
 
             if k_hop_nodes:
 
                 k_hop_nodes_index = torch.tensor(k_hop_nodes).to(DEVICE)
-                k_hop_mask = torch.zeros(65755, dtype=torch.bool, device=DEVICE)\
+                k_hop_mask = torch.zeros(x.shape[0], dtype=torch.bool, device=DEVICE)\
                                     .scatter_(0, k_hop_nodes_index, True)
                 
-            k_hop_nodesFeatureMean = torch.mean(x[k_hop_mask].to_dense(), dim=0)            
+            k_hop_nodesFeatureMean = torch.mean(x[k_hop_mask], dim=0)            
 
             hop_to_nodesFeatureMean[k] = k_hop_nodesFeatureMean
 
@@ -114,13 +119,13 @@ def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE):
 
     return node_to_hop_to_nodesFeatureMean
 
-def get_hop_to_nodesFeatureMean(data, max_k, DEVICE):
+def get_hop_to_nodesFeatureMean(data, max_k, DEVICE, json_node_hop_hopNodes=None):
     acc_hop_level_featureMean = {}
     for hop in range(max_k + 1):
         acc_hop_level_featureMean[hop] = []
 
 
-    node_to_hop_to_nodesFeatureMean = get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE)
+    node_to_hop_to_nodesFeatureMean = get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE, json_node_hop_hopNodes)
     
     for (node, hop_to_nodesFeatureMean) in node_to_hop_to_nodesFeatureMean.items():
         for hop in range(max_k+1):

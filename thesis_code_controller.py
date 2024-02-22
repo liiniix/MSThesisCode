@@ -3,6 +3,7 @@ from thesis_code_service import get_dataset, train_val_test_model_and_return_res
 from utility import make_code_reproducible, make_nvidia_faster_computation
 from plot_helper import show_layerwise_max_accuracy
 from tqdm import tqdm
+from make_dict_from_hop_json_service import make_json
 
 def get_accuracy_dependent_on_num_layers():
     combined_num_epoch = 700
@@ -13,15 +14,17 @@ def get_accuracy_dependent_on_num_layers():
                       else
                         'cpu')
 
-    dataset = get_dataset("nell")
+    dataset = get_dataset("cora")
 
     layerwise_max_acc_for_proposed = []
     layerwise_max_acc_for_gcn = []
     layerwise_max_acc_for_graphsage_mean = []
     layerwise_max_acc_for_graphsage_max = []
     layerwise_max_acc_for_gat = []
+
+    json_node_hop_hopNodes = make_json("cora", "MAkeEdgelist/Json")
     
-    cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 1, DEVICE="cpu")
+    cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 1, DEVICE, json_node_hop_hopNodes)
 
     for num_layers in tqdm(range(0, 1)):
         
