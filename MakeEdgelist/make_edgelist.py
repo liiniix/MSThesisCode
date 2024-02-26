@@ -1,4 +1,4 @@
-from thesis_code_service import get_dataset
+from Services.thesis_code_service import get_dataset
 from torch_geometric.utils.convert import to_networkx
 import networkx as nx
 

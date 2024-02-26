@@ -96,7 +96,10 @@ def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE, json_node_hop_hopNo
             cc = nx.single_source_shortest_path_length(G, node, cutoff=max_k)
         for k in range(max_k+1):
             if json_node_hop_hopNodes:
-                k_hop_nodes = json_node_hop_hopNodes[str(node)][str(k)]
+                try:
+                    k_hop_nodes = json_node_hop_hopNodes[str(node)][str(k)]
+                except KeyError:
+                    k_hop_nodes = []
                 k_hop_nodes = [int(k_hop_node) for k_hop_node in k_hop_nodes]
             else:
                 k_hop_nodes = [key for (key, value) in cc.items() if value == k]

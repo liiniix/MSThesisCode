@@ -1,10 +1,10 @@
 import torch
 from DatasetController.dataset_controller import get_cora_dataset, get_proposed_dataset, get_citeseer_dataset, get_pubmed_dataset, get_in_memeory_nell_dataset
 import torch.nn.functional as F
-from GraphSage.graph_sage_controller import get_graphsage_model
-from GCN.gcn_controller import get_gcn_model
-from GAT.gat_controller import get_gat_model
-from ProposedModel.proposed_model import get_proposed_model, get_hop_to_nodesFeatureMean
+from Models.GraphSage.graph_sage_controller import get_graphsage_model
+from Models.GCN.gcn_controller import get_gcn_model
+from Models.GAT.gat_controller import get_gat_model
+from Models.ProposedModel.proposed_model import get_proposed_model, get_hop_to_nodesFeatureMean
 from datetime import datetime
 from plot_helper import multilineplot, showProposedVsOther, compare_outputs
 
