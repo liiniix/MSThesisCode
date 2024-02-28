@@ -166,3 +166,4 @@ wandb/
 *.edgelist
 *.exe
 *.o
+*.txt

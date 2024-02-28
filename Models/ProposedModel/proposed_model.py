@@ -97,7 +97,7 @@ def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE, json_node_hop_hopNo
         for k in range(max_k+1):
             if json_node_hop_hopNodes:
                 try:
-                    k_hop_nodes = json_node_hop_hopNodes[str(node)][str(k)]
+                    k_hop_nodes = json_node_hop_hopNodes[node][k]
                 except KeyError:
                     k_hop_nodes = []
                 k_hop_nodes = [int(k_hop_node) for k_hop_node in k_hop_nodes]

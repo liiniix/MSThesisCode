@@ -105,49 +105,26 @@ void write_a_line_to_file_node_hopCount_nodes(int node,
     }
 
     ofstream MyFile(out_file, ios::app);
-    if(printStartBracket)
-    {
-        MyFile << "{";
-    }
-    if(printCommaFirst)
-    {
-        MyFile << ",";
-    }
-    MyFile << "\"" << node << "\":{";
 
-    int firstHopTracker = 0;
+    
+
     
     for(int i=0;i<=max_hop;++i)
     {
-        if(hop_to_hopNodes[i].empty())
+        bool doesCurrentHopHaveNodes = !hop_to_hopNodes[i].empty();
+        if(doesCurrentHopHaveNodes)
         {
-            continue;
-        }
+            MyFile << node << ":" << i << ":";
 
-        if(firstHopTracker != 0)
-        {
-            MyFile << ",";
-        }
-
-        MyFile << "\t\"" << i << "\":\t";
-        MyFile << "[";
-        for(int j=0;j<hop_to_hopNodes[i].size();++j)
-        {
-            MyFile << "\"" << hop_to_hopNodes[i][j] << "\"";
-            if(j<hop_to_hopNodes[i].size()-1)
+            for(int j = 0; j < hop_to_hopNodes[i].size(); ++j)
             {
-                MyFile << ",";
+                bool isFirstNode = j == 0;
+
+                MyFile << (isFirstNode ? "" : ",") << hop_to_hopNodes[i][j];
+                
             }
-        }
-        MyFile<<"]"<<endl;
-
-        firstHopTracker++;
-    }
-
-    MyFile<<"}"<<endl;
-    if(printEndBracket)
-    {
-        MyFile << "}";
+            MyFile << "\n";
+        }        
     }
 
     MyFile.close();
@@ -180,7 +157,7 @@ int main()
 
         bfs(i, adj_list, is_visited, node_to_hop, max_hop, just_see_these_nodes);
 
-        write_a_line_to_file_node_hopCount_nodes(i, edgelist_file + ".json", max_hop, node_to_hop, just_see_these_nodes, firstNodeTracker>0, i==0, i==num_nodes-1);
+        write_a_line_to_file_node_hopCount_nodes(i, edgelist_file + ".txt", max_hop, node_to_hop, just_see_these_nodes, firstNodeTracker>0, i==0, i==num_nodes-1);
 
         firstNodeTracker++;
 
