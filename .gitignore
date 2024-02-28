@@ -164,3 +164,5 @@ PracticeByExample/data/
 wandb/
 *.json
 *.edgelist
+*.exe
+*.o
