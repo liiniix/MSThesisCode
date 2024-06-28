@@ -167,3 +167,4 @@ wandb/
 *.exe
 *.o
 *.txt
+MakeEdgelist/CppHelper/LRGB/

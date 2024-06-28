@@ -2,6 +2,8 @@
 #include <fstream>
 #include <iostream>
 #include <set>
+#include <filesystem>
+
 
 #include "tqdm.hpp"
 
@@ -131,10 +133,69 @@ void write_a_line_to_file_node_hopCount_nodes(int node,
     return;
 }
 
+int number_of_files_in_directory(string directory_name)
+{
+    int count { };
+    std::filesystem::path p1 { directory_name };
+    
+    for (auto& p : std::filesystem::directory_iterator(p1))
+    {
+        ++count;
+    }
+
+    return count;
+}
+
+
 
 int main()
 {
-    string edgelist_file = ".\\MakeEdgelist\\CppHelper\\pubmed.edgelist";
+    int is_lrgb = true;
+    
+    if(is_lrgb)
+    {
+        string edgelist_folder = "LRGB/val";
+        int number_of_edgelists = number_of_files_in_directory(edgelist_folder);
+
+        for(int i: tq::trange(number_of_edgelists))
+        {
+            string edgelist_file = edgelist_folder + "/" + to_string(i) + ".edgelist";
+            int max_hop = 30;
+            int num_nodes;
+            is_edge_list_compact(edgelist_file, num_nodes);
+            
+            vector<int> adj_list[num_nodes];
+            
+            make_adj_list_of_graph(adj_list, edgelist_file);
+            
+            int firstNodeTracker = 0;
+            
+            for(int i=0;i< num_nodes; ++i)
+            {
+                bool is_visited[num_nodes];
+                memset(is_visited, false, sizeof(is_visited));
+                
+                int node_to_hop[num_nodes];
+                
+                memset(node_to_hop, -1, sizeof(node_to_hop));
+                
+                vector<int> just_see_these_nodes;
+                
+                bfs(i, adj_list, is_visited, node_to_hop, max_hop, just_see_these_nodes);
+                
+                write_a_line_to_file_node_hopCount_nodes(i, edgelist_file + ".txt", max_hop, node_to_hop, just_see_these_nodes, firstNodeTracker>0, i==0, i==num_nodes-1);
+                
+                firstNodeTracker++;
+                
+            }
+        }
+    
+    	
+    	
+    	return 0;
+    }
+    
+    string edgelist_file = "citeseer.edgelist";
     int max_hop = 30;
     int num_nodes;
     is_edge_list_compact(edgelist_file, num_nodes);

@@ -110,4 +110,8 @@ def show_layerwise_max_accuracy(layerwise_max_accuracy):
                        keys=["Proposed", "GCN", "GraphSage-mean", "GraphSage-max", "GAT"],
                        title="Test Acc",
                        xname="x units")})
+    
+    for x, nam in zip(layerwise_max_accuracy, ["Proposed", "GCN", "GraphSage-mean", "GraphSage-max", "GAT"]):
+        print(f"{nam}: {x}")
+        print("\n\n")
 

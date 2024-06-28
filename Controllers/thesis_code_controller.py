@@ -6,7 +6,7 @@ from tqdm import tqdm
 from Services.make_dict_from_hop_json_service import make_json_node_hop_hopNodes_json
 
 def get_accuracy_dependent_on_num_layers():
-    combined_num_epoch = 200
+    combined_num_epoch = 600
     print(combined_num_epoch)
     DEVICE = torch.device('cuda'
                       if
@@ -14,7 +14,7 @@ def get_accuracy_dependent_on_num_layers():
                       else
                         'cpu')
 
-    dataset = get_dataset("cora")
+    dataset = get_dataset("citeseer")
     print("ok")
 
     layerwise_max_acc_for_proposed = []
@@ -23,9 +23,9 @@ def get_accuracy_dependent_on_num_layers():
     layerwise_max_acc_for_graphsage_max = []
     layerwise_max_acc_for_gat = []
 
-    json_node_hop_hopNodes_cache = make_json_node_hop_hopNodes_json("cora", "MakeEdgelist/CppHelper")
+    json_node_hop_hopNodes_cache = make_json_node_hop_hopNodes_json("citeseer", "MakeEdgelist/CppHelper")
     
-    cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 30, DEVICE, json_node_hop_hopNodes_cache)
+    cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset[0].to(DEVICE), 30, DEVICE, json_node_hop_hopNodes_cache)
 
     for num_layers in tqdm(range(0, 30)):
         
@@ -91,7 +91,28 @@ def get_accuracy_dependent_on_num_layers():
             layerwise_max_acc_for_graphsage_max,
             layerwise_max_acc_for_gat]
 
+def make_lrgb_hop_level_feature_mean_cache():
+
+    DEVICE = torch.device('cuda'
+                      if
+                        torch.cuda.is_available()
+                      else
+                        'cpu')
+
+    dataset = get_dataset("lrgb")
+
+    for i in range(len(dataset)):
+        torch.cuda.empty_cache()
+        json_node_hop_hopNodes_cache = make_json_node_hop_hopNodes_json(f"{i}", "MakeEdgelist/CppHelper/LRGB/train")
+        cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset[i].to(DEVICE), 30, DEVICE, json_node_hop_hopNodes_cache)
+
+        torch.save(cached_acc_hop_level_featureMean, f"MakeEdgelist/CppHelper/LRGB/train/{i}.pth")
+        #cached_acc_hop_level_featureMean = torch.load(f"MakeEdgelist/CppHelper/LRGB/train/{i}.pth")
+        #print(cached_acc_hop_level_featureMean)
+
 def bong():
+    make_lrgb_hop_level_feature_mean_cache()
+    return
     print("NEW")
     make_code_reproducible()
     make_nvidia_faster_computation()

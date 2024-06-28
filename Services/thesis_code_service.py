@@ -1,5 +1,5 @@
 import torch
-from DatasetController.dataset_controller import get_cora_dataset, get_proposed_dataset, get_citeseer_dataset, get_pubmed_dataset, get_in_memeory_nell_dataset
+from DatasetController.dataset_controller import get_cora_dataset, get_proposed_dataset, get_citeseer_dataset, get_pubmed_dataset, get_in_memeory_nell_dataset, get_lrgb_dataset
 import torch.nn.functional as F
 from Models.GraphSage.graph_sage_controller import get_graphsage_model
 from Models.GCN.gcn_controller import get_gcn_model
@@ -93,11 +93,14 @@ def get_dataset(dataset_name):
     elif dataset_name=="nell":
         dataset = get_in_memeory_nell_dataset()
 
+    elif dataset_name=="lrgb":
+        dataset = get_lrgb_dataset()
+
     return dataset
 
 
-def get_hop_to_nodesFeatureMean_for_proposed_model(dataset, max_k, DEVICE, json_node_hop_hopNodes=None):
-    data = dataset[0].to(DEVICE)
+def get_hop_to_nodesFeatureMean_for_proposed_model(data, max_k, DEVICE, json_node_hop_hopNodes=None):
+    
     
     return get_hop_to_nodesFeatureMean(
         data,

@@ -59,9 +59,9 @@ class ProposedModel(torch.nn.Module):
 
     def forward(self, data):
         x, edge_index = data.x, data.edge_index
-    
+
         linears_output = [self.linears[i](self.acc_hop_level_featureMean[i]) for i in range(self.num_layers+1)]
-        
+
         if self.apply_attention:
             normalized_attention = F.softmax(self.attention, dim=0)
 
@@ -76,9 +76,9 @@ class ProposedModel(torch.nn.Module):
 
             for i in range(self.num_layers+1):
                 summed += linears_output[i]
-            
+
             summed = summed/(self.num_layers + 1)
-        
+
         out = self.final(attended if self.apply_attention else summed)
 
         return F.log_softmax(out, dim=1)
@@ -111,7 +111,7 @@ def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE, json_node_hop_hopNo
                 k_hop_nodes_index = torch.tensor(k_hop_nodes).to(DEVICE)
                 k_hop_mask = torch.zeros(x.shape[0], dtype=torch.bool, device=DEVICE)\
                                     .scatter_(0, k_hop_nodes_index, True)
-                
+
             k_hop_nodesFeatureMean = torch.mean(x[k_hop_mask], dim=0)            
 
             hop_to_nodesFeatureMean[k] = k_hop_nodesFeatureMean
@@ -141,11 +141,11 @@ def get_hop_to_nodesFeatureMean(data, max_k, DEVICE, json_node_hop_hopNodes=None
 
 
 def get_proposed_model(dataset,
-                        device,
-                        num_layers,
-                        apply_attention=False,
-                        optuna_trial=None,
-                        **kwargs):
+                       device,
+                       num_layers,
+                       apply_attention=False,
+                       optuna_trial=None,
+                       **kwargs):
     model = ProposedModel(dataset, device, num_layers, apply_attention=apply_attention, trial=optuna_trial, **kwargs)\
                     .to(device)
     return model

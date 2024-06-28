@@ -1,4 +1,4 @@
-from torch_geometric.datasets import Planetoid, CitationFull, NELL
+from torch_geometric.datasets import Planetoid, CitationFull, NELL, LRGBDataset
 from Proposed.proposed_dataset import ProposedDataset
 import torch_geometric.transforms as T
 from torch_geometric.data import InMemoryDataset, Data
@@ -47,6 +47,13 @@ def get_in_memeory_nell_dataset():
 
 def get_proposed_dataset():
     dataset = ProposedDataset(root = DATASET_ROOT_FOLDER)
+    
+    return dataset
+
+def get_lrgb_dataset(split='train'):
+    dataset = LRGBDataset(root = DATASET_ROOT_FOLDER,
+                        name= "PascalVOC-SP",
+                        split=split)
     
     return dataset
 
