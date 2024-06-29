@@ -20,9 +20,9 @@ DEVICE = torch.device('cuda'
 
 def __train(model,
             optimizer,
-            dataset):
+            data):
     
-    data = dataset[0].to(DEVICE)
+    #data = dataset[0].to(DEVICE)
 
     model.train()
     optimizer.zero_grad()
@@ -38,9 +38,9 @@ def __train(model,
 
 def __test(model,
            optimizer,
-           dataset):
+           data):
     
-    data = dataset[0].to(DEVICE)
+    #data = dataset[0].to(DEVICE)
 
 
     model.eval()
@@ -66,10 +66,10 @@ def train_and_show_stat(num_epoch,
     for epoch in range(num_epoch):
         loss_item = __train(model,
                             optimizer,
-                            dataset)
+                            dataset[0])
         train_acc, val_acc, test_acc = __test(model,
                                      optimizer,
-                                     dataset)
+                                     dataset[0])
         
         if epoch % 10 == 0:
             print(f"train accuracy: {train_acc} val_accuracy:{val_acc} test accuracy: {test_acc} loss: {loss_item}")
@@ -79,7 +79,7 @@ def train_and_show_stat(num_epoch,
             output[f"loss"].append(loss_item)
             output['x'].append(epoch)
 
-def get_dataset(dataset_name):
+def get_dataset(dataset_name, lrgb_split='train'):
 
     if dataset_name=="cora":
         dataset = get_cora_dataset()
@@ -94,7 +94,7 @@ def get_dataset(dataset_name):
         dataset = get_in_memeory_nell_dataset()
 
     elif dataset_name=="lrgb":
-        dataset = get_lrgb_dataset()
+        dataset = get_lrgb_dataset(split=lrgb_split)
 
     return dataset
 

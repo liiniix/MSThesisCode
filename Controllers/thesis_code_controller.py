@@ -99,7 +99,16 @@ def make_lrgb_hop_level_feature_mean_cache():
                       else
                         'cpu')
 
-    dataset = get_dataset("lrgb")
+    dataset = get_dataset("lrgb", lrgb_split = 'val')
+
+    for i in tqdm(range(len(dataset))):
+        torch.cuda.empty_cache()
+        json_node_hop_hopNodes_cache = make_json_node_hop_hopNodes_json(f"{i}", "MakeEdgelist/CppHelper/LRGB/val")
+        cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset[i].to(DEVICE), 30, DEVICE, json_node_hop_hopNodes_cache)
+
+        torch.save(cached_acc_hop_level_featureMean, f"MakeEdgelist/CppHelper/LRGB/val/{i}.pth")
+
+    return
 
     for i in range(len(dataset)):
         torch.cuda.empty_cache()
