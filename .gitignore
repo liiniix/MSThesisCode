@@ -168,3 +168,4 @@ wandb/
 *.o
 *.txt
 MakeEdgelist/CppHelper/LRGB/
+MakeEdgelist/CppHelper/LRGB_Pep/

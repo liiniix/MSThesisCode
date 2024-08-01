@@ -15,9 +15,9 @@ class GATModel(torch.nn.Module):
                        concat=False)
 
     def forward(self, data):
-        x, edge_index = data.x, data.edge_index
+        x, edge_index, edge_attr = data.x, data.edge_index, data.edge_attr
 
-        x = self.gat(x, edge_index)
+        x = self.gat(x, edge_index, edge_attr)
         return F.log_softmax(x, dim=1)
 
 

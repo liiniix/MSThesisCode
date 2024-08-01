@@ -7,6 +7,8 @@ from Models.GAT.gat_controller import get_gat_model
 from Models.ProposedModel.proposed_model import get_proposed_model, get_hop_to_nodesFeatureMean
 from datetime import datetime
 from plot_helper import multilineplot, showProposedVsOther, compare_outputs
+from tqdm import tqdm
+from torcheval.metrics.functional import multiclass_f1_score
 
 
 torch.manual_seed(15)
@@ -23,11 +25,15 @@ def __train(model,
             data):
     
     #data = dataset[0].to(DEVICE)
+    is_lrgb = True
 
     model.train()
     optimizer.zero_grad()
     out = model(data)
-    loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
+    if is_lrgb:
+        loss = F.nll_loss(out, data.y)
+    else:
+        loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
     
     loss.backward()
     optimizer.step()
@@ -61,15 +67,26 @@ def train_and_show_stat(num_epoch,
                         dataset,
                         prelude,
                         output,
-                        output_legend_prelude):
+                        output_legend_prelude,
+                        lrgb_index=-1):
+    
+    is_lrgb = True
+
+    if is_lrgb:
+        loss_item = __train(model,
+                            optimizer,
+                            dataset[lrgb_index].to(DEVICE))
+        print(loss_item)
+        
+        return
     
     for epoch in range(num_epoch):
         loss_item = __train(model,
                             optimizer,
-                            dataset[0])
+                            dataset[0].to(DEVICE))
         train_acc, val_acc, test_acc = __test(model,
                                      optimizer,
-                                     dataset[0])
+                                     dataset[0].to(DEVICE))
         
         if epoch % 10 == 0:
             print(f"train accuracy: {train_acc} val_accuracy:{val_acc} test accuracy: {test_acc} loss: {loss_item}")
@@ -78,6 +95,8 @@ def train_and_show_stat(num_epoch,
             output[f"test accuracy"].append(test_acc)
             output[f"loss"].append(loss_item)
             output['x'].append(epoch)
+
+    
 
 def get_dataset(dataset_name, lrgb_split='train'):
 
@@ -109,12 +128,149 @@ def get_hop_to_nodesFeatureMean_for_proposed_model(data, max_k, DEVICE, json_nod
         json_node_hop_hopNodes
     )
 
+def get_model_and_optimizer(dataset,
+              DEVICE,
+              num_layers,
+              model_name,
+              **kwargs):
+    
+    if model_name == 'proposed':
+        model = get_proposed_model(dataset,
+                                   DEVICE,
+                                   num_layers=num_layers,
+                                   apply_attention=True,
+                                   **kwargs)
+        optimizer = torch.optim.Adam(model.parameters(), lr=.0001, weight_decay=5e-2)
+
+    elif model_name == "gcn":
+        model = get_gcn_model(dataset,
+                          DEVICE,
+                          num_layers=num_layers)
+    
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.016, weight_decay=5e-4)
+        
+    elif model_name == "graphsage":
+        model = get_graphsage_model(dataset,
+                        DEVICE,
+                        num_layers=num_layers,
+                                   **kwargs)
+    
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+
+    elif model_name == "gat":
+        model = get_gat_model(dataset,
+                        DEVICE,
+                        num_layers=num_layers)
+    
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+
+    return model, optimizer
+
+def train_val_test_model_and_return_result_for_lrgb(train_dataset,
+                                                    test_dataset,
+                                                    val_dataset,
+                                                    DEVICE,
+                                                    model,
+                                                    optimizer,
+                                                    model_name,
+                                                    lrgb_dataset_path,
+                                                    **kwargs):
+
+    output = {
+                f"train accuracy":       [],
+                f"test accuracy":        [],
+                f"loss":                [],
+                'x':                   []
+    }
+
+    for epoch in range(150):
+
+        for i, data in tqdm(enumerate(train_dataset)):
+            if model_name == "proposed":
+                cached_acc_hop_level_featureMean = torch.load(f"{lrgb_dataset_path}/train/{i}.pth")
+                model.update_cache(cached_acc_hop_level_featureMean)
+
+            model.train()
+            optimizer.zero_grad()
+            out = model(data.to(DEVICE))
+            loss = F.nll_loss(out, torch.argmax(data.y, dim=1))
+            loss.backward()
+            optimizer.step()
+            loss_item = loss.item()
+
+        train_correct = 0
+        train_preds = torch.empty((0, ), dtype=torch.int32)
+        train_act = torch.empty((0, ), dtype=torch.int32)
+        total_train_nodes = 0
+
+        val_correct = 0
+        total_val_nodes = 0
+        val_preds = torch.empty((0, ), dtype=torch.int32)
+        val_act = torch.empty((0, ), dtype=torch.int32)
+
+        test_correct = 0
+        total_test_nodes = 0
+        test_preds = torch.empty((0, ), dtype=torch.int32)
+        test_act = torch.empty((0, ), dtype=torch.int32)
+
+        for i, data in tqdm(enumerate(train_dataset)):
+            if model_name == "proposed":
+                cached_acc_hop_level_featureMean = torch.load(f"{lrgb_dataset_path}/train/{i}.pth")
+                model.update_cache(cached_acc_hop_level_featureMean)
+
+            pred = model(data.to(DEVICE)).argmax(dim=1)
+            train_preds = torch.cat((train_preds, pred.to('cpu')), 0)
+            train_act = torch.cat((train_act, data.y.argmax(dim=1).to('cpu')), 0)
+
+            train_correct += (pred == data.y).sum()
+
+            total_train_nodes += data.num_nodes
+
+        for i, data in tqdm(enumerate(val_dataset)):
+            if model_name == "proposed":
+                cached_acc_hop_level_featureMean = torch.load(f"{lrgb_dataset_path}/val/{i}.pth")
+                model.update_cache(cached_acc_hop_level_featureMean)
+
+            pred = model(data.to(DEVICE)).argmax(dim=1)
+            val_preds = torch.cat((val_preds, pred.to('cpu')), 0)
+            val_act = torch.cat((val_act, data.y.argmax(dim=1).to('cpu')), 0)
+
+            val_correct += (pred == data.y).sum()
+
+            total_val_nodes += data.num_nodes
+
+        for i, data in tqdm(enumerate(test_dataset)):
+            if model_name == "proposed":
+                cached_acc_hop_level_featureMean = torch.load(f"{lrgb_dataset_path}/test/{i}.pth")
+                model.update_cache(cached_acc_hop_level_featureMean)
+
+            pred = model(data.to(DEVICE)).argmax(dim=1)
+            test_preds = torch.cat((test_preds, pred.to('cpu')), 0)
+            test_act = torch.cat((test_act, data.y.argmax(dim=1).to('cpu')), 0)
+
+            test_correct += (pred == data.y).sum()
+
+            total_test_nodes += data.num_nodes
+
+        train_acc = train_correct / total_train_nodes
+        val_acc = val_correct / total_val_nodes
+        test_acc = test_correct / total_test_nodes
+
+        train_f1 = multiclass_f1_score(train_preds, train_act, num_classes=val_dataset.num_classes, average="macro")
+
+        
+        print(f"train accuracy: {train_f1} val_accuracy:{val_acc} test accuracy: {test_acc}) loss: {loss_item}")
+        
+
+    
+
 
 def train_val_test_model_and_return_result(dataset,
                                            DEVICE,
                                            num_layers,
                                            model_name,
                                            num_epoch,
+                                           lrgb_index=-1,
                                            **kwargs):
     print(model_name)
 
@@ -159,7 +315,8 @@ def train_val_test_model_and_return_result(dataset,
                         dataset,
                         model_name,
                         output,
-                        model_name)
+                        model_name,
+                        lrgb_index=lrgb_index)
 
     return output
 
