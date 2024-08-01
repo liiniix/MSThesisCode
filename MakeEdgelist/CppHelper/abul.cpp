@@ -154,7 +154,7 @@ int main()
     
     if(is_lrgb)
     {
-        string edgelist_folder = "LRGB/val";
+        string edgelist_folder = "LRGB_Pep/train";
         int number_of_edgelists = number_of_files_in_directory(edgelist_folder);
 
         for(int i: tq::trange(number_of_edgelists))

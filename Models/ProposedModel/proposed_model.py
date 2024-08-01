@@ -5,6 +5,8 @@ from torch_geometric.utils.convert import to_networkx
 from torch_geometric.data import Data
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from torch_geometric.nn import global_mean_pool
+from torch_geometric.data import Batch
 
 def pretty(d, indent=0):
    for key, value in d.items():
@@ -80,13 +82,19 @@ class ProposedModel(torch.nn.Module):
             summed = summed/(self.num_layers + 1)
 
         out = self.final(attended if self.apply_attention else summed)
+        
+        created_batch = Batch.from_data_list([data])
+        out = global_mean_pool(out, created_batch.batch)
 
         return F.log_softmax(out, dim=1)
+    
+    def update_cache(self, cached_acc_hop_level_featureMean):
+        self.acc_hop_level_featureMean = cached_acc_hop_level_featureMean
 
 
 def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE, json_node_hop_hopNodes=None):
 
-    x = data.x.to(DEVICE)
+    x = data.x.type(torch.float32).to(DEVICE)
     G = to_networkx(data)
     node_to_hop_to_nodesFeatureMean = {}
     hop_to_nodesFeatureMean = {}

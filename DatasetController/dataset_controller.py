@@ -52,8 +52,9 @@ def get_proposed_dataset():
 
 def get_lrgb_dataset(split='train'):
     dataset = LRGBDataset(root = DATASET_ROOT_FOLDER,
-                        name= "PascalVOC-SP",
+                        name= "Peptides-func",
                         split=split)
+    # PascalVOC-SP
     
     return dataset
 
