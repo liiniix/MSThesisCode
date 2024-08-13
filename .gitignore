@@ -1,3 +1,4 @@
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -160,6 +161,7 @@ cython_debug/
 #.idea/
 
 Datasets/
+dataset/
 PracticeByExample/data/
 wandb/
 *.json
