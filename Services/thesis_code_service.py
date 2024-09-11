@@ -1,5 +1,5 @@
 import torch
-from DatasetController.dataset_controller import get_cora_dataset, get_proposed_dataset, get_citeseer_dataset, get_pubmed_dataset, get_in_memeory_nell_dataset
+from DatasetController.dataset_controller import get_cora_dataset, get_proposed_dataset, get_citeseer_dataset, get_pubmed_dataset, get_in_memeory_nell_dataset, get_ACM_dataset
 import torch.nn.functional as F
 from Models.GraphSage.graph_sage_controller import get_graphsage_model
 from Models.GCN.gcn_controller import get_gcn_model
@@ -7,6 +7,8 @@ from Models.GAT.gat_controller import get_gat_model
 from Models.ProposedModel.proposed_model import get_proposed_model, get_hop_to_nodesFeatureMean
 from datetime import datetime
 from plot_helper import multilineplot, showProposedVsOther, compare_outputs
+
+isHatero = True
 
 
 torch.manual_seed(15)
@@ -22,7 +24,32 @@ def __train(model,
             optimizer,
             dataset):
     
-    data = dataset[0].to(DEVICE)
+    if isHatero:
+        data = dataset[0].to_homogeneous()
+        acm_orig_train_mask = dataset[0]['paper']['train_mask']
+        acm_homo_train_mask_shape = data.train_mask.shape[0]
+        offset = acm_homo_train_mask_shape - acm_orig_train_mask.shape[0]
+
+        offset_tensor = torch.zeros(offset, dtype=torch.bool)
+
+        acm_homo_train_mask = torch.cat((acm_orig_train_mask, offset_tensor), dim=-1)
+
+        data.train_mask = acm_homo_train_mask
+
+
+        acm_orig_test_mask = dataset[0]['paper']['test_mask']
+        acm_homo_test_mask_shape = data.test_mask.shape[0]
+        offset = acm_homo_test_mask_shape - acm_orig_test_mask.shape[0]
+
+        offset_tensor = torch.zeros(offset, dtype=torch.bool)
+
+        acm_homo_test_mask = torch.cat((acm_orig_test_mask, offset_tensor), dim=-1)
+
+        data.test_mask = acm_homo_test_mask
+        data.to(DEVICE)
+
+    else:
+        data = dataset[0].to(DEVICE)
 
     model.train()
     optimizer.zero_grad()
@@ -40,17 +67,43 @@ def __test(model,
            optimizer,
            dataset):
     
-    data = dataset[0].to(DEVICE)
+    if isHatero:
+        data = dataset[0].to_homogeneous()
+        acm_orig_train_mask = dataset[0]['paper']['train_mask']
+        acm_homo_train_mask_shape = data.train_mask.shape[0]
+        offset = acm_homo_train_mask_shape - acm_orig_train_mask.shape[0]
+
+        offset_tensor = torch.zeros(offset, dtype=torch.bool)
+
+        acm_homo_train_mask = torch.cat((acm_orig_train_mask, offset_tensor), dim=-1)
+
+        data.train_mask = acm_homo_train_mask
+
+
+        acm_orig_test_mask = dataset[0]['paper']['test_mask']
+        acm_homo_test_mask_shape = data.test_mask.shape[0]
+        offset = acm_homo_test_mask_shape - acm_orig_test_mask.shape[0]
+
+        offset_tensor = torch.zeros(offset, dtype=torch.bool)
+
+        acm_homo_test_mask = torch.cat((acm_orig_test_mask, offset_tensor), dim=-1)
+
+        data.test_mask = acm_homo_test_mask
+        data.to(DEVICE)
+
+    else:
+        data = dataset[0].to(DEVICE)
 
 
     model.eval()
     pred = model(data).argmax(dim=1)
     train_correct = (pred[data.train_mask] == data.y[data.train_mask]).sum()
-    val_correct = (pred[data.val_mask] == data.y[data.val_mask]).sum()
+    if not(isHatero):
+        val_correct = (pred[data.val_mask] == data.y[data.val_mask]).sum()
     test_correct = (pred[data.test_mask] == data.y[data.test_mask]).sum()
 
     train_acc = int(train_correct) / int(data.train_mask.sum())
-    val_acc = int(val_correct) / int(data.val_mask.sum())
+    val_acc = int(val_correct) / int(data.val_mask.sum()) if not(isHatero) else 0.
     test_acc = int(test_correct) / int(data.test_mask.sum())
     
     return train_acc, val_acc, test_acc
@@ -93,11 +146,38 @@ def get_dataset(dataset_name):
     elif dataset_name=="nell":
         dataset = get_in_memeory_nell_dataset()
 
+    elif dataset_name=="acm":
+        dataset = get_ACM_dataset()
+
     return dataset
 
 
 def get_hop_to_nodesFeatureMean_for_proposed_model(dataset, max_k, DEVICE, json_node_hop_hopNodes=None):
-    data = dataset[0].to(DEVICE)
+    if isHatero:
+        data = dataset[0].to_homogeneous()
+        acm_orig_train_mask = dataset[0]['paper']['train_mask']
+        acm_homo_train_mask_shape = data.train_mask.shape[0]
+        offset = acm_homo_train_mask_shape - acm_orig_train_mask.shape[0]
+
+        offset_tensor = torch.zeros(offset, dtype=torch.bool)
+
+        acm_homo_train_mask = torch.cat((acm_orig_train_mask, offset_tensor), dim=-1)
+
+        data.train_mask = acm_homo_train_mask
+
+
+        acm_orig_test_mask = dataset[0]['paper']['test_mask']
+        acm_homo_test_mask_shape = data.test_mask.shape[0]
+        offset = acm_homo_test_mask_shape - acm_orig_test_mask.shape[0]
+
+        offset_tensor = torch.zeros(offset, dtype=torch.bool)
+
+        acm_homo_test_mask = torch.cat((acm_orig_test_mask, offset_tensor), dim=-1)
+
+        data.test_mask = acm_homo_test_mask
+
+    else:
+        data = dataset[0].to(DEVICE)
     
     return get_hop_to_nodesFeatureMean(
         data,
@@ -128,7 +208,7 @@ def train_val_test_model_and_return_result(dataset,
                                    num_layers=num_layers,
                                    apply_attention=True,
                                    **kwargs)
-        optimizer = torch.optim.Adam(model.parameters(), lr=.0001, weight_decay=5e-2)
+        optimizer = torch.optim.Adam(model.parameters(), lr=.000001, weight_decay=5e-2)
     elif model_name == "gcn":
         model = get_gcn_model(dataset,
                           DEVICE,

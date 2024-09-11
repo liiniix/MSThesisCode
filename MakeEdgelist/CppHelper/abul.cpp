@@ -134,9 +134,11 @@ void write_a_line_to_file_node_hopCount_nodes(int node,
 
 int main()
 {
-    string edgelist_file = ".\\MakeEdgelist\\CppHelper\\pubmed.edgelist";
+    string edgelist_file = "acm.edgelist";
     int max_hop = 30;
     int num_nodes;
+    cout << num_nodes <<endl;
+
     is_edge_list_compact(edgelist_file, num_nodes);
 
     vector<int> adj_list[num_nodes];

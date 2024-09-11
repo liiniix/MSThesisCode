@@ -6,6 +6,8 @@ from torch_geometric.data import Data
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
+isHatero = True
+
 def pretty(d, indent=0):
    for key, value in d.items():
       print('\t' * indent + str(key))
@@ -38,9 +40,12 @@ class ProposedModel(torch.nn.Module):
 
         self.DEVICE = DEVICE
         self.acc_hop_level_featureMean = cached_acc_hop_level_featureMean
-        intermediate = int(dataset.num_features / 2)
+        
+        num_features = dataset.num_features['paper'] if isHatero else dataset.num_features
+            
+        intermediate = int(num_features / 2)
 
-        self.linears = torch.nn.ModuleList([get_block(dataset.num_features,
+        self.linears = torch.nn.ModuleList([get_block(num_features,
                                                       intermediate,
                                                       bias=False)
                                             for _ in range(self.num_layers+1)])
@@ -51,9 +56,11 @@ class ProposedModel(torch.nn.Module):
                                                             )
                                                                 .to(self.DEVICE),
                                                 requires_grad=True)
+            
+        num_classes = 3 if isHatero else dataset.num_classes
 
         self.final = torch.nn.Linear(intermediate,
-                                     dataset.num_classes)
+                                     num_classes)
         self.act_final = torch.nn.Sigmoid()
 
 

@@ -1,4 +1,4 @@
-from torch_geometric.datasets import Planetoid, CitationFull, NELL
+from torch_geometric.datasets import Planetoid, CitationFull, NELL, HGBDataset
 from Proposed.proposed_dataset import ProposedDataset
 import torch_geometric.transforms as T
 from torch_geometric.data import InMemoryDataset, Data
@@ -70,6 +70,11 @@ def random_split(data, num_train_per_class: int = 20, num_val: int = 500, is_nel
 
     return data
 
+def get_ACM_dataset():
+    dataset = HGBDataset(root = DATASET_ROOT_FOLDER,
+                         name="ACM")
+    
+    return dataset
 
 
 
