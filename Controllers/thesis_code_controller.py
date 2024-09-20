@@ -1,4 +1,5 @@
 import torch
+import json
 from Services.thesis_code_service import get_dataset, train_val_test_model_and_return_result, get_hop_to_nodesFeatureMean_for_proposed_model
 from utility import make_code_reproducible, make_nvidia_faster_computation
 from plot_helper import show_layerwise_max_accuracy
@@ -14,7 +15,7 @@ def get_accuracy_dependent_on_num_layers():
                       else
                         'cpu')
 
-    dataset = get_dataset("cora")
+    dataset = get_dataset("citeseer")
     print("ok")
 
     layerwise_max_acc_for_proposed = []
@@ -23,7 +24,7 @@ def get_accuracy_dependent_on_num_layers():
     layerwise_max_acc_for_graphsage_max = []
     layerwise_max_acc_for_gat = []
 
-    json_node_hop_hopNodes_cache = make_json_node_hop_hopNodes_json("cora", "MakeEdgelist/CppHelper")
+    json_node_hop_hopNodes_cache = make_json_node_hop_hopNodes_json("citeseer", "MakeEdgelist/CppHelper")
     
     cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 30, DEVICE, json_node_hop_hopNodes_cache)
 
@@ -97,6 +98,21 @@ def bong():
     make_nvidia_faster_computation()
 
     layerwise_max_acc = get_accuracy_dependent_on_num_layers()
+
+    out_filename = "citeseer__epoch_200__0to30__PhD.json"
+    layerwise_max_acc_dict = {
+        "proposed": layerwise_max_acc[0],
+        "gcn": layerwise_max_acc[1],
+        "graphSageMean": layerwise_max_acc[2],
+        "graphSageMax": layerwise_max_acc[3],
+        "gat": layerwise_max_acc[4]
+
+    }
+
+    layerwise_max_acc_dict_json = json.dumps(layerwise_max_acc_dict)
+
+    with open(out_filename, 'w') as file:
+        file.write(layerwise_max_acc_dict_json)
 
     show_layerwise_max_accuracy(layerwise_max_acc)
 
