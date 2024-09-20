@@ -15,7 +15,7 @@ def get_accuracy_dependent_on_num_layers():
                       else
                         'cpu')
 
-    dataset = get_dataset("citeseer")
+    dataset = get_dataset("pubmed")
     print("ok")
 
     layerwise_max_acc_for_proposed = []
@@ -24,7 +24,7 @@ def get_accuracy_dependent_on_num_layers():
     layerwise_max_acc_for_graphsage_max = []
     layerwise_max_acc_for_gat = []
 
-    json_node_hop_hopNodes_cache = make_json_node_hop_hopNodes_json("citeseer", "MakeEdgelist/CppHelper")
+    json_node_hop_hopNodes_cache = make_json_node_hop_hopNodes_json("pubmed", "MakeEdgelist/CppHelper")
     
     cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 30, DEVICE, json_node_hop_hopNodes_cache)
 
@@ -99,7 +99,7 @@ def bong():
 
     layerwise_max_acc = get_accuracy_dependent_on_num_layers()
 
-    out_filename = "citeseer__epoch_200__0to30__PhD.json"
+    out_filename = "pubmed__epoch_200__0to30__PhD.json"
     layerwise_max_acc_dict = {
         "proposed": layerwise_max_acc[0],
         "gcn": layerwise_max_acc[1],
