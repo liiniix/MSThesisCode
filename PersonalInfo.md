@@ -128,3 +128,21 @@ C:\Users\Masud Karim>
 ## For windows
 `conda install pytorch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 pytorch-cuda=11.8 pyg -c pytorch -c nvidia -c pyg`
 `pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-2.1.0+cu118.html`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+lshw -short -C memory
+```

@@ -7,7 +7,7 @@ from tqdm import tqdm
 from Services.make_dict_from_hop_json_service import make_json_node_hop_hopNodes_json
 
 def get_accuracy_dependent_on_num_layers():
-    combined_num_epoch = 200
+    combined_num_epoch = 600
     print(combined_num_epoch)
     DEVICE = torch.device('cuda'
                       if
@@ -28,7 +28,7 @@ def get_accuracy_dependent_on_num_layers():
     
     cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 30, DEVICE, json_node_hop_hopNodes_cache)
 
-    for num_layers in tqdm(range(0, 30)):
+    for num_layers in tqdm(range(0, 31)):
         
         
 
@@ -101,11 +101,11 @@ def bong():
 
     out_filename = "pubmed__epoch_200__0to30__PhD.json"
     layerwise_max_acc_dict = {
-        "proposed": layerwise_max_acc[0],
-        "gcn": layerwise_max_acc[1],
-        "graphSageMean": layerwise_max_acc[2],
-        "graphSageMax": layerwise_max_acc[3],
-        "gat": layerwise_max_acc[4]
+        "HGAT": layerwise_max_acc[0],
+        "GCN": layerwise_max_acc[1],
+        "GraphSAGE-Mean": layerwise_max_acc[2],
+        "GraphSAGE-Max": layerwise_max_acc[3],
+        "GAT": layerwise_max_acc[4]
 
     }
 
