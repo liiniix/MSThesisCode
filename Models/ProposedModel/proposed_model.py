@@ -84,7 +84,8 @@ class ProposedModel(torch.nn.Module):
         return F.log_softmax(out, dim=1)
 
 
-def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE, json_node_hop_hopNodes=None):
+def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE, isMean, json_node_hop_hopNodes=None):
+    print(f"{isMean}  #############################################")
 
     x = data.x.to(DEVICE)
     G = to_networkx(data)
@@ -112,7 +113,8 @@ def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE, json_node_hop_hopNo
                 k_hop_mask = torch.zeros(x.shape[0], dtype=torch.bool, device=DEVICE)\
                                     .scatter_(0, k_hop_nodes_index, True)
                 
-            k_hop_nodesFeatureMean = torch.mean(x[k_hop_mask], dim=0)            
+
+            k_hop_nodesFeatureMean = torch.mean(x[k_hop_mask], dim=0) if isMean else torch.sum(x[k_hop_mask], dim=0)
 
             hop_to_nodesFeatureMean[k] = k_hop_nodesFeatureMean
 
@@ -122,13 +124,13 @@ def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE, json_node_hop_hopNo
 
     return node_to_hop_to_nodesFeatureMean
 
-def get_hop_to_nodesFeatureMean(data, max_k, DEVICE, json_node_hop_hopNodes=None):
+def get_hop_to_nodesFeatureMean(data, max_k, DEVICE, isMean, json_node_hop_hopNodes=None):
     acc_hop_level_featureMean = {}
     for hop in range(max_k + 1):
         acc_hop_level_featureMean[hop] = []
 
 
-    node_to_hop_to_nodesFeatureMean = get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE, json_node_hop_hopNodes)
+    node_to_hop_to_nodesFeatureMean = get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE, isMean, json_node_hop_hopNodes)
     
     for (node, hop_to_nodesFeatureMean) in node_to_hop_to_nodesFeatureMean.items():
         for hop in range(max_k+1):

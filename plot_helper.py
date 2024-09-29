@@ -107,7 +107,7 @@ def show_layerwise_max_accuracy(layerwise_max_accuracy):
     wandb.log({"acc" : wandb.plot.line_series(
                        xs=xs,
                        ys=layerwise_max_accuracy,
-                       keys=["Proposed", "GCN", "GraphSage-mean", "GraphSage-max", "GAT"],
+                       keys=["Proposed-mean", "Proposed-sum", "GCN", "GraphSage-mean", "GraphSage-sum", "GraphSage-max", "GAT"],
                        title="Test Acc",
                        xname="x units")})
 
