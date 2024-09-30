@@ -5,6 +5,7 @@ from torch_geometric.utils.convert import to_networkx
 from torch_geometric.data import Data
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import random
 
 def pretty(d, indent=0):
    for key, value in d.items():
@@ -84,7 +85,7 @@ class ProposedModel(torch.nn.Module):
         return F.log_softmax(out, dim=1)
 
 
-def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE, isMean, json_node_hop_hopNodes=None):
+def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE, isMean, sampling_size=-1, json_node_hop_hopNodes=None):
     print(f"{isMean}  #############################################")
 
     x = data.x.to(DEVICE)
@@ -101,6 +102,11 @@ def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE, isMean, json_node_h
                     k_hop_nodes = json_node_hop_hopNodes[node][k]
                 except KeyError:
                     k_hop_nodes = []
+                
+                if sampling_size != -1 and k_hop_nodes:
+                    k_hop_nodes_ = [random.choice(k_hop_nodes) for _ in range(sampling_size)]
+                    k_hop_nodes = k_hop_nodes_
+
                 k_hop_nodes = [int(k_hop_node) for k_hop_node in k_hop_nodes]
             else:
                 k_hop_nodes = [key for (key, value) in cc.items() if value == k]
@@ -124,13 +130,13 @@ def get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE, isMean, json_node_h
 
     return node_to_hop_to_nodesFeatureMean
 
-def get_hop_to_nodesFeatureMean(data, max_k, DEVICE, isMean, json_node_hop_hopNodes=None):
+def get_hop_to_nodesFeatureMean(data, max_k, DEVICE, isMean, sampling_size, json_node_hop_hopNodes=None):
     acc_hop_level_featureMean = {}
     for hop in range(max_k + 1):
         acc_hop_level_featureMean[hop] = []
 
 
-    node_to_hop_to_nodesFeatureMean = get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE, isMean, json_node_hop_hopNodes)
+    node_to_hop_to_nodesFeatureMean = get_node_to_hop_to_nodesFeatureMean(data, max_k, DEVICE, isMean, sampling_size, json_node_hop_hopNodes)
     
     for (node, hop_to_nodesFeatureMean) in node_to_hop_to_nodesFeatureMean.items():
         for hop in range(max_k+1):

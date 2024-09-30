@@ -96,7 +96,7 @@ def get_dataset(dataset_name):
     return dataset
 
 
-def get_hop_to_nodesFeatureMean_for_proposed_model(dataset, max_k, DEVICE, isMean, json_node_hop_hopNodes=None):
+def get_hop_to_nodesFeatureMean_for_proposed_model(dataset, max_k, DEVICE, isMean, sampling_size, json_node_hop_hopNodes=None):
     data = dataset[0].to(DEVICE)
     
     return get_hop_to_nodesFeatureMean(
@@ -104,6 +104,7 @@ def get_hop_to_nodesFeatureMean_for_proposed_model(dataset, max_k, DEVICE, isMea
         max_k,
         DEVICE,
         isMean,
+        sampling_size,
         json_node_hop_hopNodes
     )
 

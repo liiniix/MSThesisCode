@@ -18,8 +18,16 @@ def get_accuracy_dependent_on_num_layers(dataset_name):
     dataset = get_dataset(dataset_name)
     print("ok")
 
-    layerwise_max_acc_for_proposed_mean = []
-    layerwise_max_acc_for_proposed_sum = []
+    #layerwise_max_acc_for_proposed_mean = []
+    #layerwise_max_acc_for_proposed_sum = []
+    layerwise_max_acc_for_proposed_mean_5 = []
+    layerwise_max_acc_for_proposed_sum_5 = []
+    layerwise_max_acc_for_proposed_mean_10 = []
+    layerwise_max_acc_for_proposed_sum_10 = []
+    layerwise_max_acc_for_proposed_mean_15 = []
+    layerwise_max_acc_for_proposed_sum_15 = []
+    layerwise_max_acc_for_proposed_mean_20 = []
+    layerwise_max_acc_for_proposed_sum_20 = []
     layerwise_max_acc_for_gcn = []
     layerwise_max_acc_for_graphsage_mean = []
     layerwise_max_acc_for_graphsage_sum = []
@@ -28,20 +36,24 @@ def get_accuracy_dependent_on_num_layers(dataset_name):
 
     json_node_hop_hopNodes_cache = make_json_node_hop_hopNodes_json(dataset_name, "MakeEdgelist/CppHelper")
     
-    cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 30, DEVICE, True, json_node_hop_hopNodes_cache)
-    cached_acc_hop_level_featureSum=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 30, DEVICE, False, json_node_hop_hopNodes_cache)
+    #cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 30, DEVICE, True, json_node_hop_hopNodes_cache)
+    #cached_acc_hop_level_featureSum=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 30, DEVICE, False, json_node_hop_hopNodes_cache)
 
     for num_layers in tqdm(range(0, 31)):
-        
-        
+
         print(f"{dataset_name} {num_layers}")
+        
+        cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 30, DEVICE, True, 5, json_node_hop_hopNodes_cache)
+        cached_acc_hop_level_featureSum=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 30, DEVICE, False, 5, json_node_hop_hopNodes_cache)
+
+    
         proposed_output_mean = train_val_test_model_and_return_result(dataset,
                                             DEVICE,
                                             num_layers,
                                             "proposed",
                                             combined_num_epoch,
                                             cached_acc_hop_level_featureMean=cached_acc_hop_level_featureMean)
-        layerwise_max_acc_for_proposed_mean.append(
+        layerwise_max_acc_for_proposed_mean_5.append(
             max(proposed_output_mean['test accuracy'])
         )
 
@@ -51,9 +63,102 @@ def get_accuracy_dependent_on_num_layers(dataset_name):
                                             "proposed",
                                             combined_num_epoch,
                                             cached_acc_hop_level_featureMean=cached_acc_hop_level_featureSum)
-        layerwise_max_acc_for_proposed_sum.append(
+        layerwise_max_acc_for_proposed_sum_5.append(
             max(proposed_output_sum['test accuracy'])
         )
+
+
+
+        ##################
+
+
+
+        cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 30, DEVICE, True, 10, json_node_hop_hopNodes_cache)
+        cached_acc_hop_level_featureSum=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 30, DEVICE, False, 10, json_node_hop_hopNodes_cache)
+
+    
+        proposed_output_mean = train_val_test_model_and_return_result(dataset,
+                                            DEVICE,
+                                            num_layers,
+                                            "proposed",
+                                            combined_num_epoch,
+                                            cached_acc_hop_level_featureMean=cached_acc_hop_level_featureMean)
+        layerwise_max_acc_for_proposed_mean_10.append(
+            max(proposed_output_mean['test accuracy'])
+        )
+
+        proposed_output_sum = train_val_test_model_and_return_result(dataset,
+                                            DEVICE,
+                                            num_layers,
+                                            "proposed",
+                                            combined_num_epoch,
+                                            cached_acc_hop_level_featureMean=cached_acc_hop_level_featureSum)
+        layerwise_max_acc_for_proposed_sum_10.append(
+            max(proposed_output_sum['test accuracy'])
+        )
+
+
+
+        #####################
+
+
+        cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 30, DEVICE, True, 15, json_node_hop_hopNodes_cache)
+        cached_acc_hop_level_featureSum=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 30, DEVICE, False, 15, json_node_hop_hopNodes_cache)
+
+    
+        proposed_output_mean = train_val_test_model_and_return_result(dataset,
+                                            DEVICE,
+                                            num_layers,
+                                            "proposed",
+                                            combined_num_epoch,
+                                            cached_acc_hop_level_featureMean=cached_acc_hop_level_featureMean)
+        layerwise_max_acc_for_proposed_mean_15.append(
+            max(proposed_output_mean['test accuracy'])
+        )
+
+        proposed_output_sum = train_val_test_model_and_return_result(dataset,
+                                            DEVICE,
+                                            num_layers,
+                                            "proposed",
+                                            combined_num_epoch,
+                                            cached_acc_hop_level_featureMean=cached_acc_hop_level_featureSum)
+        layerwise_max_acc_for_proposed_sum_15.append(
+            max(proposed_output_sum['test accuracy'])
+        )
+
+
+
+        ###############################
+
+
+        cached_acc_hop_level_featureMean=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 30, DEVICE, True, 20, json_node_hop_hopNodes_cache)
+        cached_acc_hop_level_featureSum=get_hop_to_nodesFeatureMean_for_proposed_model(dataset, 30, DEVICE, False, 20, json_node_hop_hopNodes_cache)
+
+    
+        proposed_output_mean = train_val_test_model_and_return_result(dataset,
+                                            DEVICE,
+                                            num_layers,
+                                            "proposed",
+                                            combined_num_epoch,
+                                            cached_acc_hop_level_featureMean=cached_acc_hop_level_featureMean)
+        layerwise_max_acc_for_proposed_mean_20.append(
+            max(proposed_output_mean['test accuracy'])
+        )
+
+        proposed_output_sum = train_val_test_model_and_return_result(dataset,
+                                            DEVICE,
+                                            num_layers,
+                                            "proposed",
+                                            combined_num_epoch,
+                                            cached_acc_hop_level_featureMean=cached_acc_hop_level_featureSum)
+        layerwise_max_acc_for_proposed_sum_20.append(
+            max(proposed_output_sum['test accuracy'])
+        )
+
+
+
+
+        #######################################
 
         gcn_output = train_val_test_model_and_return_result(dataset,
                                             DEVICE,
@@ -110,8 +215,14 @@ def get_accuracy_dependent_on_num_layers(dataset_name):
         
 
     
-    return [layerwise_max_acc_for_proposed_mean,
-            layerwise_max_acc_for_proposed_sum,
+    return [layerwise_max_acc_for_proposed_mean_5,
+            layerwise_max_acc_for_proposed_sum_5,
+            layerwise_max_acc_for_proposed_mean_10,
+            layerwise_max_acc_for_proposed_sum_10,
+            layerwise_max_acc_for_proposed_mean_15,
+            layerwise_max_acc_for_proposed_sum_15,
+            layerwise_max_acc_for_proposed_mean_20,
+            layerwise_max_acc_for_proposed_sum_20,
             layerwise_max_acc_for_gcn,
             layerwise_max_acc_for_graphsage_mean,
             layerwise_max_acc_for_graphsage_sum,
@@ -127,15 +238,21 @@ def bong():
 
         layerwise_max_acc = get_accuracy_dependent_on_num_layers(dataset_name)
 
-        out_filename = f"{dataset_name}__epoch_600__0to30__PhD.json"
+        out_filename = f"{dataset_name}__epoch_600__0to30__PhD_rand.json"
         layerwise_max_acc_dict = {
-            "HGAT-sum": layerwise_max_acc[0],
-            "HGAT-mean": layerwise_max_acc[1],
-            "GCN": layerwise_max_acc[2],
-            "GraphSAGE-Mean": layerwise_max_acc[3],
-            "GraphSAGE-Sum": layerwise_max_acc[4],
-            "GraphSAGE-Max": layerwise_max_acc[5],
-            "GAT": layerwise_max_acc[6]
+            "HGAT-mean-5": layerwise_max_acc[0],
+            "HGAT-sum-5": layerwise_max_acc[1],
+            "HGAT-mean-10": layerwise_max_acc[2],
+            "HGAT-sum-10": layerwise_max_acc[3],
+            "HGAT-mean-15": layerwise_max_acc[4],
+            "HGAT-sum-15": layerwise_max_acc[5],
+            "HGAT-mean-20": layerwise_max_acc[6],
+            "HGAT-sum-20": layerwise_max_acc[7],
+            "GCN": layerwise_max_acc[8],
+            "GraphSAGE-Mean": layerwise_max_acc[9],
+            "GraphSAGE-Sum": layerwise_max_acc[10],
+            "GraphSAGE-Max": layerwise_max_acc[11],
+            "GAT": layerwise_max_acc[12]
 
         }
 

@@ -4,15 +4,15 @@ import json
 from scipy import interpolate
 import numpy as np
 
-colors = ["#ef233c", "#928e85", "#1c629d", "#748700", "#000000"]
+colors = ["#ff2926", "#f172d3", "#928e85", "#1c629d", "#748700", "#000000", "#008631"]
 
-isSavePGF = False
+isSavePGF = True
 
 plt.style.use(['science', 'grid'])
 
 def make_content(dataset_name):
 
-    with open(f'{dataset_name}__epoch_200__0to30__PhD.json', 'r') as file:
+    with open(f'{dataset_name}__epoch_600__0to30__PhD.json', 'r') as file:
         data = json.load(file)
 
     for i, (method_name, out) in enumerate(data.items()):
@@ -63,7 +63,7 @@ def make_final(dataset_name):
     plt.xlabel("Number of GNN Layers, $K$")
     plt.ylabel("Node Classificaion Accuracy")
     if isSavePGF:
-        plt.savefig(f"{dataset_name}__epoch_200__0to30__PhD.pgf")
+        plt.savefig(f"{dataset_name}__epoch_600__0to30__PhD.pgf")
     else:
         plt.show()
 
